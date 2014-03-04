@@ -20,7 +20,8 @@
 #define HAND_WIN	1
 #define HAND_LOSS	2
 
-#define CARDS_MAX	52
+#define MAX_CARDS	52
+#define MAX_RAND	64
 
 #define BJE_ARGS	1
 
@@ -56,6 +57,7 @@ struct blackjack_context
 {
 	struct card deck[CARDS_MAX];
 	struct card *shuffled;
+	char rand_state[MAX_RAND];
 	struct dealer
 	{
 		int state;
