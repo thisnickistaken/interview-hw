@@ -20,6 +20,8 @@
 #define HAND_WIN	1
 #define HAND_LOSS	2
 
+#define CARDS_MAX	52
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -50,7 +52,7 @@ struct player
 
 struct blackjack_context
 {
-	struct card deck[52];
+	struct card deck[CARDS_MAX];
 	struct card *shuffled;
 	struct dealer
 	{
