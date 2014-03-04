@@ -22,6 +22,8 @@
 
 #define CARDS_MAX	52
 
+#define BJE_ARGS	1
+
 #ifdef __cplusplus
 extern "C"
 {
