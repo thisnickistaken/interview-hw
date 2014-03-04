@@ -24,6 +24,7 @@
 #define MAX_RAND	64
 
 #define BJE_ARGS	1
+#define BJE_FREE	2
 
 #ifdef __cplusplus
 extern "C"
@@ -75,6 +76,10 @@ int play_hand(struct player *p, int action);
 int play_dealer(struct blackjack_context *ctx);
 
 struct card *deal_card(struct blackjack_context *ctx);
+
+int free_blackjack_context(struct *blackjack_context);
+int free_player(struct player *p);
+int free_hand(struct player *p);
 
 #ifdef __cplusplus
 }
