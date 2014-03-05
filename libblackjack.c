@@ -349,3 +349,117 @@ void free_hand(struct player *p)
 	return;
 }
 
+int str_to_suit(char *name)
+{
+	if(!name)
+		return 0;
+	
+	if(strcasecmp(name, "hearts") == 0)
+		return SUIT_HEARTS;
+	if(strcasecmp(name, "diamonds") == 0)
+		return SUIT_DIAMONDS;
+	if(strcasecmp(name, "clubs") == 0)
+		return SUIT_CLUBS;
+	if(strcasecmp(name, "spades") == 0)
+		return SUIT_SPADES;
+	
+	return 0;
+}
+
+int str_to_face(char *name)
+{
+	if(!name)
+		return 0;
+	
+	if(strcasecmp(name, "one") == 0 || strcasecmp(name, "ace") == 0)
+		return 1;
+	if(strcasecmp(name, "two") == 0)
+		return 2;
+	if(strcasecmp(name, "three") == 0)
+		return 3;
+	if(strcasecmp(name, "four") == 0)
+		return 4;
+	if(strcasecmp(name, "five") == 0)
+		return 5;
+	if(strcasecmp(name, "six") == 0)
+		return 6;
+	if(strcasecmp(name, "seven") == 0)
+		return 7;
+	if(strcasecmp(name, "eight") == 0)
+		return 8;
+	if(strcasecmp(name, "nine") == 0)
+		return 9;
+	if(strcasecmp(name, "ten") == 0)
+		return 10;
+	if(strcasecmp(name, "jack") == 0)
+		return 11;
+	if(strcasecmp(name, "queen") == 0)
+		return 12;
+	if(strcasecmp(name, "king") == 0)
+		return 13;
+	
+	return 0;
+}
+
+int str_to_value(char *name)
+{
+	int x;
+	
+	if((x = str_to_face(name)) >= 10)
+		return 10;
+	else
+		return x;
+}
+
+char *suit_to_str(int type)
+{
+	switch(type)
+	{
+		case SUIT_HEARTS:
+			return "Hearts";
+		case SUIT_DIAMONDS:
+			return "Diamonds";
+		case SUIT_CLUBDS:
+			return "Clubs";
+		case SUIT_SPADES:
+			return "Spades";
+		default:
+			return "<Invalid Suit>"
+	}
+}
+
+char *face_to_str(int type)
+{
+	switch(type)
+	{
+		case 1:
+			return "Ace":
+		case 2:
+			return "Two":
+		case 3:
+			return "Three";
+		case 4:
+			return "Four";
+		case 5:
+			return "Five";
+		case 6:
+			return "Six";
+		case 7:
+			return "Seven";
+		case 8:
+			return "Eight";
+		case 9:
+			return "Nine";
+		case 10:
+			return "Ten";
+		case 11:
+			return "Jack";
+		case 12:
+			return "Queen";
+		case 13:
+			return "King";
+		default:
+			return "<Invalid Value>";
+	}
+}
+

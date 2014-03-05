@@ -97,6 +97,12 @@ void free_player(struct player *p);
 void free_players(struct player *p);
 void free_hand(struct player *p);
 
+int str_to_suit(char *name);
+int str_to_face(char *name);
+int str_to_value(char *name);
+char *suit_to_str(int type);
+char *face_to_str(int type);
+
 #ifdef __cplusplus
 }
 #endif
