@@ -26,5 +26,5 @@ uninstall:
 	rm -f $(inc)/blackjack.h
 
 clean:
-	rm *.o *~ *.so*
+	rm -f *.o *~ *.so*
 
