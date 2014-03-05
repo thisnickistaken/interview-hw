@@ -25,6 +25,7 @@
 
 #define BJE_ARGS	1
 #define BJE_FREE	2
+#define BJE_DEAL	3
 
 #ifdef __cplusplus
 extern "C"
