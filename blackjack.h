@@ -76,6 +76,7 @@ struct blackjack_context
 
 struct blackjack_context *create_blackjack_context();
 struct player *create_player(char *name, float balance);
+struct hand *create_hand(float bet);
 
 int shuffle_deck(struct blackjack_context *ctx);
 int deal_game(struct blackjack_context *ctx);
