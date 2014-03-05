@@ -325,7 +325,7 @@ void free_blackjack_context(struct blackjack_context *ctx)
 {
 	if(ctx)
 	{
-		if(ctx->dealer.cards)
+		if(ctx->seats)
 			free_players(ctx->seats);
 		free(ctx);
 	}
