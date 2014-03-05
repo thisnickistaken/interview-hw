@@ -18,12 +18,14 @@ all:
 install:
 	install -m 755 -o root -g root libblackjack.so.0.0.0 $(lib)
 	$(ldconfig)
-	ln -s libjacksock.so.0 $(lib)/libblackjack.so
+	ln -sf libjacksock.so.0 $(lib)/libblackjack.so
 	install -m 755 -o root -g root blackjack-cli $(bin)
 	install -m 644 -o root -g root blackjack.h $(inc)
 
 uninstall:
-	rm -f $(lib)/libblackjack.so $(lib)/libblackjack.so.0
+	rm -f $(lib)/libblackjack.so $(lib)/libblackjack.so.0.0.0
+	$(ldconfig)
+	rm -f $(bin)/blackjack-cli
 	rm -f $(inc)/blackjack.h
 
 clean:
