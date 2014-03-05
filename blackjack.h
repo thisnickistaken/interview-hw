@@ -68,7 +68,7 @@ struct blackjack_context
 	struct dealer
 	{
 		int state;
-		struct cards *cards;
+		struct card *cards;
 	} dealer;
 	struct player *seats;
 };
