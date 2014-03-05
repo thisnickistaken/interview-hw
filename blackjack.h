@@ -17,9 +17,10 @@
 #define ACT_SURRENDER	5
 
 #define HAND_IN_PLAY	0
-#define HAND_WIN	1
-#define HAND_LOSS	2
-#define HAND_STAND	3
+#define HAND_STAND	1
+#define HAND_WIN	2
+#define HAND_LOSS	3
+#define HAND_BLACKJACK	4
 
 #define MAX_CARDS	52
 #define MAX_RAND	64
