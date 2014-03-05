@@ -88,7 +88,7 @@ int deal_game(struct blackjack_context *ctx);
 int play_hand(struct blackjack_context *ctx, struct player *p, int action);
 int play_dealer(struct blackjack_context *ctx);
 int card_value(struct card *c);
-int card_value_sum(struct card *cards);
+int card_value_sum(struct card *c);
 
 struct card *deal_card(struct blackjack_context *ctx);
 
