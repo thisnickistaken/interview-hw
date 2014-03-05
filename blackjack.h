@@ -62,7 +62,7 @@ struct player
 
 struct blackjack_context
 {
-	struct card deck[CARDS_MAX];
+	struct card deck[MAX_CARDS];
 	struct card *shuffled;
 	char rand_state[MAX_RAND];
 	struct dealer
