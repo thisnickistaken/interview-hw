@@ -94,6 +94,7 @@ struct card *deal_card(struct blackjack_context *ctx);
 
 int free_blackjack_context(struct blackjack_context *ctx);
 int free_player(struct player *p);
+int free_players(struct player *p);
 int free_hand(struct player *p);
 
 #ifdef __cplusplus
