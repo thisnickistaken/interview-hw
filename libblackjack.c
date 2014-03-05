@@ -36,9 +36,9 @@ struct player *create_player(char *name, float balance)
 		if(!(p->name = strdup(name)))
 		{
 			free(p);
-			return NULL
+			return NULL;
 		}
-		p->balace = balance;
+		p->balance = balance;
 	}
 	
 	return p;
@@ -289,9 +289,16 @@ int add_player(struct blackjack_context *ctx, char *name, float balance)
 			return BJE_DUP;
 		last = p;
 	}
-	
-	if(!(last->next = create_player(name, balance)))
-		return BJE_ALLOC;
+	if(!last)
+	{
+		if(!(ctx->seats = create_player(name, balance)))
+			return BJE_ALLOC;
+	}
+	else
+	{
+		if(!(last->next = create_player(name, balance)))
+			return BJE_ALLOC;
+	}
 	
 	return 0;
 }
