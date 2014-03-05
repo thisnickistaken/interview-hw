@@ -21,6 +21,7 @@
 #define HAND_WIN	2
 #define HAND_LOSS	3
 #define HAND_BLACKJACK	4
+#define HAND_SURRENDER	5
 
 #define MAX_CARDS	52
 #define MAX_RAND	64
