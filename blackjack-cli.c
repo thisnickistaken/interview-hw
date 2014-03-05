@@ -17,13 +17,9 @@ void cleanup(int ret, struct run_info *run);
 int main(int argc, char **argv)
 {
 	struct run_info *run = NULL;
+	int players = 1;
 	int x, y, z;
 	
-	if(argc < 2)
-	{
-		usage(argv[0]);
-		return 0;
-	}
 	run = malloc(sizeof(struct run_info));
 	memset(run, 0, sizeof(struct run_info));
 	on_exit((void(*)(int, void*))cleanup, run);
@@ -41,10 +37,30 @@ int main(int argc, char **argv)
 				{
 					switch((argv[x])[y])
 					{
+						case 'p':
+							if((argv[x])[y + 1])
+								players = atoi(argv[x] + y + 1);
+							else
+							{
+								if(argc > x + 1)
+									players = atoi(argv[++x]);
+								else
+								{
+									printf("Error: Number of players not specified.\n");
+									exit(1);
+								}
+							}
+							z++;
+							break;
+						case 'h':
+							usage(argv[0]);
+							exit(0);
 						default:
 							printf("Error: Unknown option: \'%c\'\n", (argv[x])[y]);
 							exit(1);
 					}
+					if(z)
+						break;
 				}
 				break;
 			default:
@@ -61,8 +77,11 @@ void usage(char *name)
 	if(!name)
 		return;
 	
-	printf("Usage: %s\n"
-		"\n", name);
+	printf("Usage: %s [options]\n"
+		"\n"
+		"\tOptions:\n"
+		"\t-p\t--\tSpecify number of players\n"
+		"\t-h\t--\tDisplays this screen.\n", name);
 	
 	return;
 }
