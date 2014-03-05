@@ -84,11 +84,11 @@ int shuffle_deck(struct blackjack_context *ctx)
 		c = NULL;
 		while(!c)
 		{
-			r = (random() / RAND_MAX) * 52;
+			r = ((float)random() / RAND_MAX) * 52;
 			if(&ctx->deck[r] != last && !ctx->deck[r].next)
 			{
 				if(!ctx->shuffled)
-					ctx->shuffled = last = &ctx->deck[r];
+					ctx->shuffled = last = c = &ctx->deck[r];
 				else
 				{
 					last->next = c = &ctx->deck[r];
