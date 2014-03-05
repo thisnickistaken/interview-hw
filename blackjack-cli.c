@@ -8,6 +8,7 @@
 struct run_info
 {
 	struct blackjack_context *ctx;
+	char *buf;
 };
 
 void usage(char *name);
@@ -18,6 +19,7 @@ int main(int argc, char **argv)
 {
 	struct run_info *run = NULL;
 	int players = 1;
+	float balance = 1000;
 	int x, y, z;
 	
 	run = malloc(sizeof(struct run_info));
@@ -52,6 +54,21 @@ int main(int argc, char **argv)
 							}
 							z++;
 							break;
+						case 'b':
+							if((argv[x])[y + 1])
+								balance = atof(argv[x] + y + 1);
+							else
+							{
+								if(argc > x + 1)
+									balance = atof(argv[++x]);
+								else
+								{
+									printf("Error: Default balance not secified\n");
+									exit(1);
+								}
+							}
+							z++;
+							break;
 						case 'h':
 							usage(argv[0]);
 							exit(0);
@@ -66,6 +83,29 @@ int main(int argc, char **argv)
 			default:
 				printf("Error: unexpected argument: \"%s\"\n", argv[x]);
 				exit(1);
+		}
+	}
+	
+	if(!(run->ctx = create_blackjack_context()))
+	{
+		printf("Error: Failed to create context for libblackjack\n");
+		exit(1);
+	}
+	
+	if(!(run->buf = malloc(128)))
+	{
+		printf("Error: failed to allocate name buffer\n");
+		exit(1);
+	}
+	
+	for(x ^= x; x < players; x++)
+	{
+		printf("Enter name for player %d: ", x + 1);
+		fgets(run->buf, 128, stdin);
+		if(add_player(run->ctx, run->buf, balance))
+		{
+			printf("Error: failed to add player to context\n");
+			exit(1);
 		}
 	}
 	
@@ -121,6 +161,8 @@ void crash(int signal)
 void cleanup(int ret, struct run_info *run)
 {
 	free_blackjack_context(run->ctx);
+	if(run->buf)
+		free(run->buf);
 	free(run);
 }
 
