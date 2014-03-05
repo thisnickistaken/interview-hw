@@ -34,6 +34,7 @@
 #define BJE_BET		-7
 #define BJE_SPLIT	-8
 #define BJE_ALLOC	-9
+#define BJE_FIRST	-10
 
 #ifdef __cplusplus
 extern "C"
