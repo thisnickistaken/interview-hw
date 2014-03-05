@@ -16,8 +16,8 @@ struct blackjack_context *create_blackjack_context()
 		{
 			ctx->deck[x].suit = (x / 13) + 1;
 			ctx->deck[x].value = (x % 13) + 1;
-			initstate(time(NULL), ctx->rand_state, MAX_RAND);
 		}
+		initstate(time(NULL), ctx->rand_state, MAX_RAND);
 	}
 	
 	return ctx;
