@@ -33,8 +33,12 @@ struct player *create_player(char *name, float balance)
 	if(p = malloc(sizeof(struct player)))
 	{
 		memset(p, 0, sizeof(struct player));
-		p->name = name;
-		p->balance = balance;
+		if(!(p->name = strdup(name)))
+		{
+			free(p);
+			return NULL
+		}
+		p->balace = balance;
 	}
 	
 	return p;
