@@ -77,6 +77,7 @@ int shuffle_deck(struct blackjack_context *ctx);
 int deal_game(struct blackjack_context *ctx);
 int play_hand(struct player *p, int action);
 int play_dealer(struct blackjack_context *ctx);
+int card_value(struct card *c);
 
 struct card *deal_card(struct blackjack_context *ctx);
 
