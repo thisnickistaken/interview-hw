@@ -29,6 +29,7 @@
 #define BJE_DEAL	-3
 #define BJE_ACTION	-4
 #define BJE_NOP		-5
+#define BJE_COUNT	-6
 
 #ifdef __cplusplus
 extern "C"
