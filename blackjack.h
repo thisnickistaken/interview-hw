@@ -92,10 +92,10 @@ int card_value_sum(struct card *c);
 
 struct card *deal_card(struct blackjack_context *ctx);
 
-int free_blackjack_context(struct blackjack_context *ctx);
-int free_player(struct player *p);
-int free_players(struct player *p);
-int free_hand(struct player *p);
+void free_blackjack_context(struct blackjack_context *ctx);
+void free_player(struct player *p);
+void free_players(struct player *p);
+void free_hand(struct player *p);
 
 #ifdef __cplusplus
 }
