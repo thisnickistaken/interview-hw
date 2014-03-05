@@ -419,12 +419,12 @@ char *suit_to_str(int type)
 			return "Hearts";
 		case SUIT_DIAMONDS:
 			return "Diamonds";
-		case SUIT_CLUBDS:
+		case SUIT_CLUBS:
 			return "Clubs";
 		case SUIT_SPADES:
 			return "Spades";
 		default:
-			return "<Invalid Suit>"
+			return "<Invalid Suit>";
 	}
 }
 
@@ -433,9 +433,9 @@ char *face_to_str(int type)
 	switch(type)
 	{
 		case 1:
-			return "Ace":
+			return "Ace";
 		case 2:
-			return "Two":
+			return "Two";
 		case 3:
 			return "Three";
 		case 4:
