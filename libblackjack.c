@@ -275,6 +275,23 @@ int card_value_sum(struct card *c)
 	return total;
 }
 
+int add_player(struct blackjack_context *ctx, char *name, float balance)
+{
+	struct player *p = NULL, *last = NULL;
+	
+	for(p = ctx->seats; p; p = p->next)
+	{
+		if(strcasecmp(p->name, name) == 0)
+			return BJE_DUP;
+		last = p;
+	}
+	
+	if(!(last->next = create_player(name, balance)))
+		return BJE_ALLOC;
+	
+	return 0;
+}
+
 struct card *deal_card(struct blackjack_context *ctx)
 {
 	struct card *c = NULL;
