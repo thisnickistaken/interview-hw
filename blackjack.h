@@ -23,10 +23,11 @@
 #define MAX_CARDS	52
 #define MAX_RAND	64
 
-#define BJE_ARGS	1
-#define BJE_FREE	2
-#define BJE_DEAL	3
-#define BJE_ACTION	4
+#define BJE_ARGS	-1
+#define BJE_FREE	-2
+#define BJE_DEAL	-3
+#define BJE_ACTION	-4
+#define BJE_NOP		-5
 
 #ifdef __cplusplus
 extern "C"
