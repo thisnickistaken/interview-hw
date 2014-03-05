@@ -19,6 +19,7 @@
 #define HAND_IN_PLAY	0
 #define HAND_WIN	1
 #define HAND_LOSS	2
+#define HAND_STAND	3
 
 #define MAX_CARDS	52
 #define MAX_RAND	64
@@ -75,7 +76,7 @@ struct player *create_player(char *name, float balance);
 
 int shuffle_deck(struct blackjack_context *ctx);
 int deal_game(struct blackjack_context *ctx);
-int play_hand(struct player *p, int action);
+int play_hand(struct blackjack_context *ctx, struct player *p, int action);
 int play_dealer(struct blackjack_context *ctx);
 int card_value(struct card *c);
 
