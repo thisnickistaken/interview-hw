@@ -102,8 +102,19 @@ void free_hand(struct player *p);
 int str_to_suit(char *name);
 int str_to_face(char *name);
 int str_to_value(char *name);
+int str_to_state(char *name);
 char *suit_to_str(int type);
 char *face_to_str(int type);
+char *state_to_str(int type);
+
+void print_card(struct card *c);
+void print_cards(struct card *c);
+void print_hand(struct hand *h);
+void print_hands(struct hand *h);
+void print_player(struct player *p);
+void print_players(struct player *p);
+void print_dealer(struct blackjack_context *ctx);
+void print_game(struct blackjack_context *ctx);
 
 #ifdef __cplusplus
 }

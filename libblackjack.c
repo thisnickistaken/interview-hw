@@ -1,4 +1,5 @@
 #include <time.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -439,6 +440,29 @@ int str_to_value(char *name)
 		return x;
 }
 
+int str_to_state(char *name)
+{
+	if(!name)
+		return 0;
+	
+	if(strcasecmp(name, "in play") == 0)
+		return HAND_IN_PLAY;
+	if(strcasecmp(name, "stand") == 0)
+		return HAND_STAND;
+	if(strcasecmp(name, "win") == 0)
+		return HAND_WIN;
+	if(strcasecmp(name, "loss") == 0)
+		return HAND_LOSS;
+	if(strcasecmp(name, "blackjack") == 0 || strcasecmp(name, "black jack") == 0)
+		return HAND_BLACKJACK;
+	if(strcasecmp(name, "surrender") == 0)
+		return HAND_SURRENDER;
+	if(strcasecmp(name, "bust") == 0)
+		return HAND_BUST;
+	
+	return 0;
+}
+
 char *suit_to_str(int type)
 {
 	switch(type)
@@ -488,6 +512,99 @@ char *face_to_str(int type)
 			return "King";
 		default:
 			return "<Invalid Value>";
+	}
+}
+
+char *state_to_str(int type)
+{
+	switch(type)
+	{
+		case HAND_IN_PLAY:
+			return "In Play";
+		case HAND_STAND:
+			return "Stand";
+		case HAND_WIN:
+			return "Win";
+		case HAND_LOSS:
+			return "loss";
+		case HAND_BLACKJACK:
+			return "Blackjack";
+		case HAND_SURRENDER:
+			return "Surrendered";
+		case HAND_BUST:
+			return "Bust";
+		default:
+			return "<Invalid Hand State>";
+	}
+}
+
+void print_card(struct card *c)
+{
+	if(c)
+		printf("\t%s of %s\n", face_to_str(c->value), suit_to_str(c->suit));
+}
+
+void print_cards(struct card *c)
+{
+	while(c)
+	{
+		print_card(c);
+		c = c->next;
+	}
+}
+
+void print_hand(struct hand *h)
+{
+	if(h)
+	{
+		printf("\tWager: $%5.2f\n"
+			"\tState: %s\n", h->bet, state_to_str(h->state));
+		print_cards(h->cards);
+	}
+}
+
+void print_hands(struct hand *h)
+{
+	while(h)
+	{
+		print_hand(h);
+		h = h->split;
+	}
+}
+
+void print_player(struct player *p)
+{
+	if(p)
+		printf("Player: %s\n", p->name);
+}
+
+void print_players(struct player *p)
+{
+	while(p)
+	{
+		print_player(p);
+		p = p->next;
+	}
+}
+
+void print_dealer(struct blackjack_context *ctx)
+{
+	if(ctx)
+	{
+		printf("Dealer:\n"
+			"\tState: %s\n", state_to_str(ctx->dealer.state));
+		if(ctx->dealer.cards)
+			print_cards(ctx->dealer.cards);
+	}
+}
+
+void print_game(struct blackjack_context *ctx)
+{
+	if(ctx)
+	{
+		printf("[BlackJack]\n");
+		print_dealer(ctx);
+		print_players(ctx->seats);
 	}
 }
 
