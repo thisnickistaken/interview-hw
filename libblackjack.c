@@ -185,10 +185,10 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action)
 		case ACT_SPLIT:
 			if(h->cards->next->next)
 				return BJE_FIRST;
-			if(!(p->balance >= h->bet))
-				return BJE_BET;
 			if(card_value(h->cards) != card_value(h->cards->next))
 				return BJE_SPLIT;
+			if(!(p->balance >= h->bet))
+				return BJE_BET;
 			if(!(h->split = create_hand(h->bet)))
 				return BJE_ALLOC;
 			p->balance -= h->bet;
