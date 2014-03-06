@@ -104,9 +104,11 @@ int str_to_suit(char *name);
 int str_to_face(char *name);
 int str_to_value(char *name);
 int str_to_state(char *name);
+int str_to_action(char *name);
 char *suit_to_str(int type);
 char *face_to_str(int type);
 char *state_to_str(int type);
+char *action_to_str(int type);
 
 void print_card(struct card *c);
 void print_cards(struct card *c);

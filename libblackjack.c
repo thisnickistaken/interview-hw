@@ -124,11 +124,7 @@ int deal_game(struct blackjack_context *ctx)
 		if((x = card_value_sum(p->hand.cards)) < 0)
 			return BJE_COUNT;
 		if(x == 21)
-		{
 			p->hand.state = HAND_BLACKJACK;
-//			p->hand.bet = (p->hand.bet * 3) / 2.0f;
-//			p->balance += p->hand.bet;
-		}
 	}
 	if(!(c = ctx->dealer.cards->next = deal_card(ctx)))
 		return BJE_DEAL;
@@ -163,7 +159,9 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action)
 				return BJE_DEAL;
 			if((x = card_value_sum(h->cards)) < 0)
 				return BJE_COUNT;
-			if(x > 21)
+			if(x == 21)
+				h->state = HAND_STAND;
+			else if(x > 21)
 				h->state = HAND_BUST;
 			break;
 		case ACT_STAND:
@@ -480,6 +478,25 @@ int str_to_state(char *name)
 	return 0;
 }
 
+int str_to_action(char *name)
+{
+	if(!name)
+		return 0;
+	
+	if(strcasecmp(name, "hit") == 0 || strcasecmp(name, "h" == 0))
+		return ACT_HIT:
+	if(strcasecmp(name, "stand") == 0 || strcasecmp(name, "st") == 0)
+		return ACT_STAND;
+	if(strcasecmp(name, "double down") == 0 || strcasecmp(name, "double") == 0 || strcasecmp(name, "dd") == 0)
+		return ACT_DOUBLE_DOWN;
+	if(strcasecmp(name, "split") == 0 || strcasecmp(name, "sp") == 0)
+		return ACT_SPLIT;
+	if(strcasecmp(name, "surrender") == 0 || strcasecmp(name, "sur") == 0)
+		return ACT_SURRENDER;
+	
+	return 0;
+}
+
 char *suit_to_str(int type)
 {
 	switch(type)
@@ -555,6 +572,25 @@ char *state_to_str(int type)
 	}
 }
 
+char *action_to_str(int type)
+{
+	switch(type)
+	{
+		case ACT_HIT:
+			return "Hit";
+		case ACT_STAND:
+			return "Stand";
+		case ACT_DOUBLE_DOWN:
+			return "Double Down";
+		case ACT_SPLIT:
+			return "Split";
+		case ACT_SURRENDER:
+			return "Surrender";
+		default:
+			return "<Invalid Action>";
+	}
+}
+
 void print_card(struct card *c)
 {
 	if(c)
@@ -574,7 +610,7 @@ void print_hand(struct hand *h)
 {
 	if(h)
 	{
-		printf("\tWager: $%5.2f\n"
+		printf("\tWager: $%8.2f\n"
 			"\tState: %s\n", h->bet, state_to_str(h->state));
 		print_cards(h->cards);
 	}
