@@ -333,7 +333,7 @@ int playing(struct player *p)
 	return 0;
 }
 
-int dealer_playing(struct backjack_context *ctx)
+int dealer_playing(struct blackjack_context *ctx)
 {
 	if(!ctx)
 		return 0;
@@ -348,6 +348,7 @@ int resolve_game(struct blackjack_context *ctx)
 {
 	struct player *p = NULL;
 	struct hand *h = NULL;
+	int player, dealer;
 	
 	if(!ctx)
 		return BJE_ARGS;
@@ -364,8 +365,45 @@ int resolve_game(struct blackjack_context *ctx)
 				case HAND_SURRENDER:
 					h->bet /= 2;
 					break;
-				case HAND_
+				case HAND_BLACKJACK:
+					if(ctx->dealer.state == HAND_BLACKJACK)
+						h->state = HAND_PUSH;
+					else
+						h->bet *= (float)5/2;
+					break;
+				case HAND_STAND:
+					switch(ctx->dealer.state)
+					{
+						case HAND_BLACKJACK:
+							h->state = HAND_LOSS;
+							h->bet = 0;
+							break;
+						case HAND_STAND:
+							player = card_value_sum(h->cards);
+							dealer = card_value_sum(ctx->dealer.cards);
+							if(player < dealer)
+							{
+								h->state = HAND_LOSS;
+								h->bet = 0;
+								break;
+							}
+							if(player == dealer)
+							{
+								h->state = HAND_PUSH;
+								break;
+							}
+						case HAND_BUST:
+							h->state = HAND_WIN;
+							h->bet *= 2;
+							break;
+						default:
+							return BJE_NOP;
+					}
+					break;
+				default:
+					return BJE_NOP;
 			}
+			p->balance += h->bet;
 		}
 	}
 	
