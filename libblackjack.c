@@ -576,7 +576,8 @@ void print_player(struct player *p)
 {
 	if(p)
 	{
-		printf("Player: %s\n", p->name);
+		printf("Player: %s\n"
+			"\tBalance: $%8.2f\n", p->name, p->balance);
 		print_hands(&p->hand);
 	}
 }
