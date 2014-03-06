@@ -91,6 +91,7 @@ int play_dealer(struct blackjack_context *ctx);
 int card_value(struct card *c);
 int card_value_sum(struct card *c);
 int add_player(struct blackjack_context *ctx, char *name, float balance);
+int place_bet(struct player *p, float bet);
 
 struct card *deal_card(struct blackjack_context *ctx);
 

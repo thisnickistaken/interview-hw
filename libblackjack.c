@@ -304,6 +304,23 @@ int add_player(struct blackjack_context *ctx, char *name, float balance)
 	return 0;
 }
 
+int place_bet(struct player *p, float bet)
+{
+	if(!p)
+		return BJE_ARGS;
+	
+	if(p->hand.bet != 0)
+		return BJE_ACTION;
+	
+	if(bet > p->balance)
+		return BJE_BET;
+	
+	p->hand.bet = bet;
+	p->balance -= bet;
+	
+	return 0;
+}
+
 struct card *deal_card(struct blackjack_context *ctx)
 {
 	struct card *c = NULL;
