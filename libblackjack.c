@@ -333,6 +333,17 @@ int playing(struct player *p)
 	return 0;
 }
 
+int dealer_playing(struct backjack_context *ctx)
+{
+	if(!ctx)
+		return 0;
+	
+	if(ctx->dealer.state == HAND_IN_PLAY)
+		return 1;
+	
+	return 0;
+}
+
 struct card *deal_card(struct blackjack_context *ctx)
 {
 	struct card *c = NULL;
