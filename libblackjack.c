@@ -183,10 +183,10 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action)
 				h->state = HAND_STAND;
 			break;
 		case ACT_SPLIT:
-			if(!(p->balance >= h->bet))
-				return BJE_BET;
 			if(h->cards->next->next)
 				return BJE_FIRST;
+			if(!(p->balance >= h->bet))
+				return BJE_BET;
 			if(card_value(h->cards) != card_value(h->cards->next))
 				return BJE_SPLIT;
 			if(!(h->split = create_hand(h->bet)))
@@ -683,6 +683,37 @@ char *action_to_str(int type)
 			return "Surrender";
 		default:
 			return "<Invalid Action>";
+	}
+}
+
+char *error_to_str(int type)
+{
+	switch(type)
+	{
+		case BJE_ARGS:
+			return "Invalid argument(s)";
+		case BJE_FREE:
+			return "Dealocator failure";
+		case BJE_DEAL:
+			return "Dealing failure";
+		case BJE_ACTION:
+			return "Invalid action";
+		case BJE_NOP:
+			return "Nohing to do";
+		case BJE_COUNT:
+			return "Counting algorithm failure";
+		case BJE_BET:
+			return "Insufficient funds for bet";
+		case BJE_SPLIT:
+			return "Cannot split cards of inequal value";
+		case BJE_ALLOC:
+			return "Allocator failure";
+		case BJE_FIRST:
+			return "Action must be performed as the first acton of a hand";
+		case BJE_DUP:
+			return "Duplicate entry";
+		default:
+			return "Unknown error";
 	}
 }
 
