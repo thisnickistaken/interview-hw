@@ -23,6 +23,7 @@
 #define HAND_BLACKJACK	4
 #define HAND_SURRENDER	5
 #define HAND_BUST	6
+#define HAND_PUSH	7
 
 #define MAX_CARDS	52
 #define MAX_RAND	64
@@ -93,7 +94,8 @@ int card_value_sum(struct card *c);
 int add_player(struct blackjack_context *ctx, char *name, float balance);
 int place_bet(struct player *p, float bet);
 int playing(struct player *p);
-int dealer_playing(struct backjack_context);
+int dealer_playing(struct backjack_context *ctx);
+int resolve_game(struct blackjack_context *ctx);
 
 struct card *deal_card(struct blackjack_context *ctx);
 

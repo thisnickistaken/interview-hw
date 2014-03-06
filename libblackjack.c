@@ -344,6 +344,34 @@ int dealer_playing(struct backjack_context *ctx)
 	return 0;
 }
 
+int resolve_game(struct blackjack_context *ctx)
+{
+	struct player *p = NULL;
+	struct hand *h = NULL;
+	
+	if(!ctx)
+		return BJE_ARGS;
+	
+	for(p = ctx->seats; p; p = p->next)
+	{
+		for(h = &p->hand; h; h = h->split)
+		{
+			switch(h->state)
+			{
+				case HAND_BUST:
+					h->bet = 0;
+					break;
+				case HAND_SURRENDER:
+					h->bet /= 2;
+					break;
+				case HAND_
+			}
+		}
+	}
+	
+	return 0;
+}
+
 struct card *deal_card(struct blackjack_context *ctx)
 {
 	struct card *c = NULL;
@@ -499,6 +527,8 @@ int str_to_state(char *name)
 		return HAND_SURRENDER;
 	if(strcasecmp(name, "bust") == 0)
 		return HAND_BUST;
+	if(strcasecmp(name, "push") == 0)
+		return HAND_PUSH;
 	
 	return 0;
 }
@@ -592,6 +622,8 @@ char *state_to_str(int type)
 			return "Surrendered";
 		case HAND_BUST:
 			return "Bust";
+		case HAND_PUSH:
+			return "Push";
 		default:
 			return "<Invalid Hand State>";
 	}
