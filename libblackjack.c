@@ -541,7 +541,7 @@ char *state_to_str(int type)
 void print_card(struct card *c)
 {
 	if(c)
-		printf("\t%s of %s\n", face_to_str(c->value), suit_to_str(c->suit));
+		printf("\t\t%s of %s\n", face_to_str(c->value), suit_to_str(c->suit));
 }
 
 void print_cards(struct card *c)
@@ -575,7 +575,10 @@ void print_hands(struct hand *h)
 void print_player(struct player *p)
 {
 	if(p)
+	{
 		printf("Player: %s\n", p->name);
+		print_hands(&p->hand);
+	}
 }
 
 void print_players(struct player *p)
