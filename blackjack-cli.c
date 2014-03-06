@@ -155,10 +155,22 @@ int main(int argc, char **argv)
 			x = strlen(run->buf) - 1;
 			if(run->buf[x] == '\n')
 				run->buf[x] = 0;
-			if(play_hand(run->ctx, p, str_to_action(run->buf)))
+			
+			z ^= z;
+			switch(x = play_hand(run->ctx, p, str_to_action(run->buf)))
 			{
-				printf("Error: Failed to play hand\n");
-				exit(1);
+				case 0:
+					break;
+				case BJE_ACTION:
+				case BJE_BET:
+				case BJE_FIRST:
+				case BJE_SPLIT:
+					z++;
+				default:
+					printf("%s%s\n", z ? "" : "Fatal: ", error_to_str(x));
+					if(!z)
+						exit(1);
+					break;
 			}
 //			system("clear");
 		}
