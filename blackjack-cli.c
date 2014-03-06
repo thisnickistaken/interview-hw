@@ -5,6 +5,8 @@
 
 #include "blackjack.h"
 
+#define INPUT_BUFSZ	32
+
 struct run_info
 {
 	struct blackjack_context *ctx;
@@ -18,7 +20,9 @@ void cleanup(int ret, struct run_info *run);
 int main(int argc, char **argv)
 {
 	struct run_info *run = NULL;
-	int players = 1;
+	struct card *c = NULL;
+	struct player *p = NULL;
+	char *player = NULL;
 	float balance = 1000;
 	int x, y, z;
 	
@@ -28,6 +32,12 @@ int main(int argc, char **argv)
 	
 	for(x = 1; x < 31; x++)
 		signal(x, crash);
+	
+	if(!(run->ctx = create_blackjack_context()))
+	{
+		printf("Error: Failed to create context for libblackjack\n");
+		exit(1);
+	}
 	
 	for(x = 1; x < argc; x++)
 	{
@@ -41,16 +51,21 @@ int main(int argc, char **argv)
 					{
 						case 'p':
 							if((argv[x])[y + 1])
-								players = atoi(argv[x] + y + 1);
+								player = argv[x] + y + 1;
 							else
 							{
 								if(argc > x + 1)
-									players = atoi(argv[++x]);
+									player = argv[++x];
 								else
 								{
 									printf("Error: Number of players not specified.\n");
 									exit(1);
 								}
+							}
+							if(add_player(run->ctx, player, balance))
+							{
+								printf("Error: Failed to add player \"%s\"\n", player);
+								exit(1);
 							}
 							z++;
 							break;
@@ -86,28 +101,89 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if(!(run->ctx = create_blackjack_context()))
+	if(!run->ctx->seats)
 	{
-		printf("Error: Failed to create context for libblackjack\n");
+		printf("Error: No players seated at table\n");
 		exit(1);
 	}
 	
-	if(!(run->buf = malloc(128)))
+	if(shuffle_deck(run->ctx))
 	{
-		printf("Error: failed to allocate name buffer\n");
+		printf("Error: failed to shuffle deck\n");
 		exit(1);
 	}
 	
-	for(x ^= x; x < players; x++)
+	if(!(run->buf = malloc(INPUT_BUFSZ)))
 	{
-		printf("Enter name for player %d: ", x + 1);
-		fgets(run->buf, 128, stdin);
-		if(add_player(run->ctx, run->buf, balance))
+		printf("Error: Failed to allocate input buffer.\n");
+		exit(1);
+	}
+	
+	for(p = run->ctx->seats; p; p = p->next)
+	{
+		printf("%s, please enter your wager: ", p->name);
+		if(!fgets(run->buf, INPUT_BUFSZ, stdin))
 		{
-			printf("Error: failed to add player to context\n");
+			printf("Error: Failed to read input\n");
+			exit(1);
+		}
+		if(place_bet(p, atof(run->buf)))
+		{
+			printf("Error: failed to place bet\n");
 			exit(1);
 		}
 	}
+//	system("clear");
+	
+	if(deal_game(run->ctx))
+	{
+		printf("Error: failed to deal cards\n");
+		exit(1);
+	}
+	
+	for(p = run->ctx->seats; p; p = p->next)
+	{
+		while(playing(p))
+		{
+			print_player(p);
+			printf("%s, what would you like to do? ", p->name);
+			if(!fgets(run->buf, INPUT_BUFSZ, stdin))
+			{
+				printf("Error: Failed to read input\n");
+				exit(1);
+			}
+			x = strlen(run->buf) - 1;
+			if(run->buf[x] == '\n')
+				run->buf[x] = 0;
+			if(play_hand(run->ctx, p, str_to_action(run->buf)))
+			{
+				printf("Error: Failed to play hand\n");
+				exit(1);
+			}
+//			system("clear");
+		}
+		print_player(p);
+	}
+	
+	while(dealer_playing(run->ctx))
+	{
+		print_dealer(run->ctx);
+		if(play_dealer(run->ctx))
+		{
+			printf("Error: Failed to play dealer's hand\n");
+			exit(1);
+		}
+	}
+	print_dealer(run->ctx);
+
+	if(resolve_game(run->ctx))
+	{
+		printf("Error: Failed to resolve game\n");
+		exit(1);
+	}
+	
+//	system("clear");
+	print_game(run->ctx);
 	
 	exit(0);
 }
@@ -120,7 +196,8 @@ void usage(char *name)
 	printf("Usage: %s [options]\n"
 		"\n"
 		"\tOptions:\n"
-		"\t-p\t--\tSpecify number of players\n"
+		"\t-p\t--\tSpecify player names. Can be used multiple times for more than one player.\n"
+		"\t-b\t--\tSpecify player starting balance. Specify before players to be affected. (Default: 1000.00)\n"
 		"\t-h\t--\tDisplays this screen.\n", name);
 	
 	return;
