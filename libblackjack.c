@@ -483,8 +483,8 @@ int str_to_action(char *name)
 	if(!name)
 		return 0;
 	
-	if(strcasecmp(name, "hit") == 0 || strcasecmp(name, "h" == 0))
-		return ACT_HIT:
+	if(strcasecmp(name, "hit") == 0 || strcasecmp(name, "h") == 0)
+		return ACT_HIT;
 	if(strcasecmp(name, "stand") == 0 || strcasecmp(name, "st") == 0)
 		return ACT_STAND;
 	if(strcasecmp(name, "double down") == 0 || strcasecmp(name, "double") == 0 || strcasecmp(name, "dd") == 0)
