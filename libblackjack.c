@@ -319,6 +319,20 @@ int place_bet(struct player *p, float bet)
 	return 0;
 }
 
+int playing(struct player *p)
+{
+	struct hand *h = NULL;
+	
+	if(!p)
+		return 0;
+	
+	for(h = &p->hand; h; h = h->split)
+		if(h->state == HAND_IN_PLAY)
+			return 1;
+	
+	return 0;
+}
+
 struct card *deal_card(struct blackjack_context *ctx)
 {
 	struct card *c = NULL;
