@@ -331,17 +331,17 @@ int remove_player(struct blackjack_context *ctx, struct player *p)
 
 int place_bet(struct player *p, float bet)
 {
+	float tmp;
+
 	if(!p)
 		return BJE_ARGS;
-	
-	if(p->hand.bet != 0)
-		return BJE_ACTION;
 	
 	if(bet > p->balance)
 		return BJE_BET;
 	
+	tmp = bet - p->hand.bet;
 	p->hand.bet = bet;
-	p->balance -= bet;
+	p->balance -= tmp;
 	
 	return 0;
 }
