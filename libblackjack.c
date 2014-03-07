@@ -316,7 +316,7 @@ int remove_player(struct player **plist, struct player *p)
 	
 	if(!plist || !p)
 		return BJE_ARGS;
-	if(!ctx->seats)
+	if(!*plist)
 		return BJE_NOP;
 	
 	if(*plist == p)
