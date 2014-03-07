@@ -101,17 +101,17 @@ int main(int argc, char **argv)
 		}
 	}
 	
+	if(!(run->buf = malloc(INPUT_BUFSZ)))
+	{
+		printf("Error: Failed to allocate input buffer.\n");
+		exit(1);
+	}
+	
 	while(run->ctx->seats)
 	{
 		if(shuffle_deck(run->ctx))
 		{
 			printf("Error: failed to shuffle deck\n");
-			exit(1);
-		}
-		
-		if(!(run->buf = malloc(INPUT_BUFSZ)))
-		{
-			printf("Error: Failed to allocate input buffer.\n");
 			exit(1);
 		}
 		
