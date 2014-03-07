@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 									exit(1);
 								}
 							}
-							if(add_player(run->ctx, player, balance))
+							if(add_player(run->ctx, create_player(player, balance)))
 							{
 								printf("Error: Failed to add player \"%s\"\n", player);
 								exit(1);
@@ -101,70 +101,37 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if(!run->ctx->seats)
+	while(run->ctx->seats)
 	{
-		printf("Error: No players seated at table\n");
-		exit(1);
-	}
-	
-	if(shuffle_deck(run->ctx))
-	{
-		printf("Error: failed to shuffle deck\n");
-		exit(1);
-	}
-	
-	if(!(run->buf = malloc(INPUT_BUFSZ)))
-	{
-		printf("Error: Failed to allocate input buffer.\n");
-		exit(1);
-	}
-	
-	for(p = run->ctx->seats; p; p = p->next)
-	{
-		printf("%s, please enter your wager: ", p->name);
-		if(!fgets(run->buf, INPUT_BUFSZ, stdin))
+		if(shuffle_deck(run->ctx))
 		{
-			printf("Error: Failed to read input\n");
+			printf("Error: failed to shuffle deck\n");
 			exit(1);
 		}
-		if(place_bet(p, atof(run->buf)))
+		
+		if(!(run->buf = malloc(INPUT_BUFSZ)))
 		{
-			printf("Error: failed to place bet\n");
+			printf("Error: Failed to allocate input buffer.\n");
 			exit(1);
 		}
-	}
-//	system("clear");
-	
-	if(deal_game(run->ctx))
-	{
-		printf("Error: failed to deal cards\n");
-		exit(1);
-	}
-	
-	for(p = run->ctx->seats; p; p = p->next)
-	{
-		while(playing(p))
+		
+		p = run->ctx->seats;
+		while(p)
 		{
-			print_player(p);
-			printf("%s, what would you like to do? ", p->name);
+			printf("%s, please enter your wager: ", p->name);
 			if(!fgets(run->buf, INPUT_BUFSZ, stdin))
 			{
 				printf("Error: Failed to read input\n");
 				exit(1);
 			}
-			x = strlen(run->buf) - 1;
-			if(run->buf[x] == '\n')
-				run->buf[x] = 0;
-			
 			z ^= z;
-			switch(x = play_hand(run->ctx, p, str_to_action(run->buf)))
+			switch(x = place_bet(p, atof(run->buf)))
 			{
 				case 0:
+					p = p->next;
 					break;
-				case BJE_ACTION:
 				case BJE_BET:
-				case BJE_FIRST:
-				case BJE_SPLIT:
+				case BJE_NEG_BET:
 					z++;
 				default:
 					printf("%s%s\n", z ? "" : "Fatal: ", error_to_str(x));
@@ -172,30 +139,73 @@ int main(int argc, char **argv)
 						exit(1);
 					break;
 			}
-//			system("clear");
 		}
-		print_player(p);
-	}
-	
-	while(dealer_playing(run->ctx))
-	{
-		print_dealer(run->ctx);
-		if(play_dealer(run->ctx))
+//		system("clear");
+		
+		if(deal_game(run->ctx))
 		{
-			printf("Error: Failed to play dealer's hand\n");
+			printf("Error: failed to deal cards\n");
 			exit(1);
 		}
-	}
-	print_dealer(run->ctx);
-
-	if(resolve_game(run->ctx))
-	{
-		printf("Error: Failed to resolve game\n");
-		exit(1);
-	}
+		
+		for(p = run->ctx->seats; p; p = p->next)
+		{
+			while(playing(p))
+			{
+				print_player(p);
+				printf("%s, what would you like to do? ", p->name);
+				if(!fgets(run->buf, INPUT_BUFSZ, stdin))
+				{
+					printf("Error: Failed to read input\n");
+					exit(1);
+				}
+				x = strlen(run->buf) - 1;
+				if(run->buf[x] == '\n')
+					run->buf[x] = 0;
+				
+				z ^= z;
+				switch(x = play_hand(run->ctx, p, str_to_action(run->buf)))
+				{
+					case 0:
+						break;
+					case BJE_ACTION:
+					case BJE_BET:
+					case BJE_FIRST:
+					case BJE_SPLIT:
+						z++;
+					default:
+						printf("%s%s\n", z ? "" : "Fatal: ", error_to_str(x));
+						if(!z)
+							exit(1);
+						break;
+				}
+//				system("clear");
+			}
+			print_player(p);
+		}
+		
+		while(dealer_playing(run->ctx))
+		{
+			print_dealer(run->ctx);
+			if(play_dealer(run->ctx))
+			{
+				printf("Error: Failed to play dealer's hand\n");
+				exit(1);
+			}
+		}
+		print_dealer(run->ctx);
 	
-//	system("clear");
-	print_game(run->ctx);
+		if(resolve_game(run->ctx))
+		{
+			printf("Error: Failed to resolve game\n");
+			exit(1);
+		}
+		
+//		system("clear");
+		print_game(run->ctx);
+	}
+
+	printf("Game has ended.\n");
 	
 	exit(0);
 }
