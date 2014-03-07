@@ -10,6 +10,7 @@
 struct run_info
 {
 	struct blackjack_context *ctx;
+	struct player *retired;
 	char *buf;
 };
 
@@ -24,7 +25,7 @@ int main(int argc, char **argv)
 	struct player *p = NULL;
 	char *player = NULL;
 	float balance = 1000;
-	int x, y, z;
+	int x, y, z, ret;
 	
 	run = malloc(sizeof(struct run_info));
 	memset(run, 0, sizeof(struct run_info));
@@ -62,9 +63,9 @@ int main(int argc, char **argv)
 									exit(1);
 								}
 							}
-							if(add_player(run->ctx, create_player(player, balance)))
+							if(ret = add_player(&run->ctx->seats, create_player(player, balance)))
 							{
-								printf("Error: Failed to add player \"%s\"\n", player);
+								printf("Error: Failed to add player \"%s\": %s\n", player, error_to_str(ret));
 								exit(1);
 							}
 							z++;
@@ -109,9 +110,9 @@ int main(int argc, char **argv)
 	
 	while(run->ctx->seats)
 	{
-		if(shuffle_deck(run->ctx))
+		if(ret = shuffle_deck(run->ctx))
 		{
-			printf("Error: failed to shuffle deck\n");
+			printf("Error: Failed to shuffle deck: %s\n", error_to_str(ret));
 			exit(1);
 		}
 		
@@ -142,9 +143,9 @@ int main(int argc, char **argv)
 		}
 //		system("clear");
 		
-		if(deal_game(run->ctx))
+		if(ret = deal_game(run->ctx))
 		{
-			printf("Error: failed to deal cards\n");
+			printf("Error: Failed to deal cards: %s\n", error_to_str((ret));
 			exit(1);
 		}
 		
@@ -195,14 +196,30 @@ int main(int argc, char **argv)
 		}
 		print_dealer(run->ctx);
 	
-		if(resolve_game(run->ctx))
+		if(x = resolve_game(run->ctx))
 		{
-			printf("Error: Failed to resolve game\n");
+			printf("Error: Failed to resolve game: %s\n", error_to_str(x));
 			exit(1);
 		}
 		
 //		system("clear");
 		print_game(run->ctx);
+		
+		for(p = run->ctx->seats; p; p = p->next)
+			if(p->balance == 0)
+			{
+				printf("%s has gone broke! Retiring player.\n", p->name);
+				if(x = remove_player(&run->ctx->seats, p))
+				{
+					printf("Error: Failed to remove player: %s\n", error_to_str(x));
+					exit(1);
+				}
+				if(x = add_player(&run->retired, p))
+				{
+					printf("Error: Failed to add player: %s\n", error_to_str(x));
+					exit(1);
+				}
+			}
 	}
 
 	printf("Game has ended.\n");
@@ -250,6 +267,8 @@ void crash(int signal)
 		case SIGURG:
 			printf("Urgent condition on socket.\n");
 			break;
+		case SIGWINCH:
+			break;
 		default:
 			printf("Unknown signal: %u\n", signal);
 	}
@@ -259,9 +278,12 @@ void crash(int signal)
 
 void cleanup(int ret, struct run_info *run)
 {
-	free_blackjack_context(run->ctx);
 	if(run->buf)
 		free(run->buf);
+	if(run->retired)
+		free_players(run->retired);
+	if(run->ctx)
+		free_blackjack_context(run->ctx);
 	free(run);
 }
 
