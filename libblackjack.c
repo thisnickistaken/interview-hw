@@ -113,13 +113,23 @@ int deal_game(struct blackjack_context *ctx)
 		return BJE_ARGS;
 	
 	for(p = ctx->seats; p; p = p->next)
-		if(!(c = p->hand.cards = deal_card(ctx)))
-			return BJE_DEAL;
+	{
+		if(p->hand.bet > 0)
+		{
+			if(!(c = p->hand.cards = deal_card(ctx)))
+				return BJE_DEAL;
+		}
+		else
+			p->hand.state = HAND_WATCHING;
+
+	}
 	if(!(c = ctx->dealer.cards = deal_card(ctx)))
 		return BJE_DEAL;
 	
 	for(p = ctx->seats; p; p = p->next)
 	{
+		if(p->hand.state == HAND_WATCHING)
+			continue;
 		if(!(c = p->hand.cards->next = deal_card(ctx)))
 			return BJE_DEAL;
 		if((x = card_value_sum(p->hand.cards)) < 0)
@@ -279,44 +289,44 @@ int card_value_sum(struct card *c)
 	return total;
 }
 
-int add_player(struct blackjack_context *ctx, struct player *p)
+int add_player(struct player **plist, struct player *p)
 {
 	struct player *ptmp = NULL, *last = NULL;
 	
-	if(!ctx || !p)
+	if(!plist || !p)
 		return BJE_ARGS;
 	
-	for(ptmp = ctx->seats; ptmp; ptmp = ptmp->next)
+	for(ptmp = *plist; ptmp; ptmp = ptmp->next)
 	{
 		if(strcasecmp(ptmp->name, p->name) == 0)
 			return BJE_DUP;
 		last = ptmp;
 	}
 	if(!last)
-		ctx->seats = p;
+		*plist = p;
 	else
 		last->next = p;
 	
 	return 0;
 }
 
-int remove_player(struct blackjack_context *ctx, struct player *p)
+int remove_player(struct player **plist, struct player *p)
 {
 	struct player *ptmp = NULL;
 	
-	if(!ctx || !p)
+	if(!plist || !p)
 		return BJE_ARGS;
 	if(!ctx->seats)
 		return BJE_NOP;
 	
-	if(ctx->seats == p)
+	if(*plist == p)
 	{
-		ctx->seats = p->next;
+		*plist = p->next;
 		p->next = NULL;
 		return 0;
 	}
 	else
-		for(ptmp = ctx->seats; ptmp->next; ptmp = ptmp->next)
+		for(ptmp = *plist; ptmp->next; ptmp = ptmp->next)
 		{
 			if(ptmp->next == p)
 			{
@@ -389,6 +399,8 @@ int resolve_game(struct blackjack_context *ctx)
 		{
 			switch(h->state)
 			{
+				case HAND_WATCHING:
+					break;
 				case HAND_BUST:
 					h->bet = 0;
 					break;
