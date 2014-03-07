@@ -336,6 +336,9 @@ int place_bet(struct player *p, float bet)
 	if(!p)
 		return BJE_ARGS;
 	
+	if(bet < 0)
+		return BJE_NEG_BET;
+	
 	if(bet > p->balance)
 		return BJE_BET;
 	
@@ -743,6 +746,10 @@ char *error_to_str(int type)
 			return "Action must be performed as the first acton of a hand";
 		case BJE_DUP:
 			return "Duplicate entry";
+		case BJE_NOT_FOUND:
+			return "Entry not found";
+		case BJE_NEG_BET:
+			return "No negative bets";
 		default:
 			return "Unknown error";
 	}
