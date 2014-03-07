@@ -24,6 +24,7 @@
 #define HAND_SURRENDER	5
 #define HAND_BUST	6
 #define HAND_PUSH	7
+#define HAND_WATCHING	8
 
 #define MAX_CARDS	52
 #define MAX_RAND	64
@@ -39,6 +40,7 @@
 #define BJE_ALLOC	-9
 #define BJE_FIRST	-10
 #define BJE_DUP		-11
+#define BJE_NOT_FOUND	-12
 
 #ifdef __cplusplus
 extern "C"
@@ -91,7 +93,8 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action);
 int play_dealer(struct blackjack_context *ctx);
 int card_value(struct card *c);
 int card_value_sum(struct card *c);
-int add_player(struct blackjack_context *ctx, char *name, float balance);
+int add_player(struct blackjack_context *ctx, struct player *p);
+int remove_player(struct blackjack_context *ctx, struct player *p);
 int place_bet(struct player *p, float bet);
 int playing(struct player *p);
 int dealer_playing(struct blackjack_context *ctx);

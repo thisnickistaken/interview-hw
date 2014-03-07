@@ -77,6 +77,7 @@ int shuffle_deck(struct blackjack_context *ctx)
 		free_hand(p);
 	memset(&ctx->dealer, 0, sizeof(struct dealer));
 	
+	ctx->shuffled = NULL;
 	for(x ^= x; x < MAX_CARDS; x++)
 		ctx->deck[x].next = NULL;
 	
@@ -278,28 +279,54 @@ int card_value_sum(struct card *c)
 	return total;
 }
 
-int add_player(struct blackjack_context *ctx, char *name, float balance)
+int add_player(struct blackjack_context *ctx, struct player *p)
 {
-	struct player *p = NULL, *last = NULL;
+	struct player *ptmp = NULL, *last = NULL;
 	
-	for(p = ctx->seats; p; p = p->next)
+	if(!ctx || !p)
+		return BJE_ARGS;
+	
+	for(ptmp = ctx->seats; ptmp; ptmp = ptmp->next)
 	{
-		if(strcasecmp(p->name, name) == 0)
+		if(strcasecmp(ptmp->name, p->name) == 0)
 			return BJE_DUP;
-		last = p;
+		last = ptmp;
 	}
 	if(!last)
-	{
-		if(!(ctx->seats = create_player(name, balance)))
-			return BJE_ALLOC;
-	}
+		ctx->seats = p;
 	else
-	{
-		if(!(last->next = create_player(name, balance)))
-			return BJE_ALLOC;
-	}
+		last->next = p;
 	
 	return 0;
+}
+
+int remove_player(struct blackjack_context *ctx, struct player *p)
+{
+	struct player *ptmp = NULL;
+	
+	if(!ctx || !p)
+		return BJE_ARGS;
+	if(!ctx->seats)
+		return BJE_NOP;
+	
+	if(ctx->seats == p)
+	{
+		ctx->seats = p->next;
+		p->next = NULL;
+		return 0;
+	}
+	else
+		for(ptmp = ctx->seats; ptmp->next; ptmp = ptmp->next)
+		{
+			if(ptmp->next == p)
+			{
+				ptmp->next = p->next;
+				p->next = NULL;
+				return 0;
+			}
+		}
+	
+	return BJE_NOT_FOUND;
 }
 
 int place_bet(struct player *p, float bet)
@@ -567,6 +594,8 @@ int str_to_state(char *name)
 		return HAND_BUST;
 	if(strcasecmp(name, "push") == 0)
 		return HAND_PUSH;
+	if(strcasecmp(name, "watching") == 0)
+		return HAND_WATCHING;
 	
 	return 0;
 }
@@ -578,7 +607,7 @@ int str_to_action(char *name)
 	
 	if(strcasecmp(name, "hit") == 0 || strcasecmp(name, "h") == 0)
 		return ACT_HIT;
-	if(strcasecmp(name, "stand") == 0 || strcasecmp(name, "st") == 0)
+	if(strcasecmp(name, "stand") == 0 || strcasecmp(name, "stay") == 0 || strcasecmp(name, "st") == 0)
 		return ACT_STAND;
 	if(strcasecmp(name, "double down") == 0 || strcasecmp(name, "double") == 0 || strcasecmp(name, "dd") == 0)
 		return ACT_DOUBLE_DOWN;
@@ -653,7 +682,7 @@ char *state_to_str(int type)
 		case HAND_WIN:
 			return "Win";
 		case HAND_LOSS:
-			return "loss";
+			return "Loss";
 		case HAND_BLACKJACK:
 			return "Blackjack";
 		case HAND_SURRENDER:
@@ -662,6 +691,8 @@ char *state_to_str(int type)
 			return "Bust";
 		case HAND_PUSH:
 			return "Push";
+		case HAND_WATCHING:
+			return "Watching";
 		default:
 			return "<Invalid Hand State>";
 	}
