@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 		
 		if(ret = deal_game(run->ctx))
 		{
-			printf("Error: Failed to deal cards: %s\n", error_to_str((ret));
+			printf("Error: Failed to deal cards: %s\n", error_to_str(ret));
 			exit(1);
 		}
 		
