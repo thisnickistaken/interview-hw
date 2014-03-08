@@ -30,6 +30,10 @@ VALUE game_playing(VALUE self, VALUE name);
 VALUE game_dealer_playing(VALUE self);
 VALUE game_resolve(VALUE self);
 
+VALUE game_print_player(VALUE self, VALUE name);
+VALUE game_print_dealer(VALUE self);
+VALUE game_print_game(VALUE self);
+
 void Init_blackjack()
 {
 	mBlackJack = rb_define_module("BlackJack");
@@ -310,5 +314,38 @@ VALUE game_resolve(VALUE self)
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	return INT2NUM(resolve_game(ctx));
+}
+
+VALUE game_print_player(VALUE self, VALUE name)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	
+	Check_Type(name, T_STRING);
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return INT2NUM(BJE_NOT_FOUND);
+	
+	print_player(p);
+}
+
+VALUE game_print_dealer(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	print_dealer(ctx);
+}
+
+VALUE game_print_game(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	print_game(ctx);
 }
 
