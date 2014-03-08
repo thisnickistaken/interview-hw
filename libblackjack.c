@@ -213,8 +213,6 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action)
 		case ACT_SURRENDER:
 			if(h->cards->next->next)
 				return BJE_FIRST;
-			h->bet /= 2;
-			p->balance += h->bet;
 			h->state = HAND_SURRENDER;
 			break;
 		default:
