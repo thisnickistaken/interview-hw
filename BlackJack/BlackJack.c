@@ -21,7 +21,7 @@ VALUE bj_error_to_str(VALUE self, VALUE type);
 VALUE game_initialize(VALUE self);
 VALUE game_shuffle_deck(VALUE self);
 VALUE game_deal(VALUE self);
-VALUE game_play_hand(VALUE self, VALUE player, VALUE action);
+VALUE game_play_hand(VALUE self, VALUE name, VALUE action);
 VALUE game_play_dealer(VALUE self);
 VALUE game_add_player(VALUE self, VALUE name, VALUE balance);
 VALUE game_remove_player(VALUE self, VALUE name);
@@ -199,16 +199,18 @@ VALUE game_deal(VALUE self)
 	return INT2NUM(deal_game(ctx));
 }
 
-VALUE game_play_hand(VALUE self, VALUE player, VALUE action)
+VALUE game_play_hand(VALUE self, VALUE name, VALUE action)
 {
 	struct player *p = NULL;
 	struct blackjack_context *ctx = NULL;
 	
-	Check_Type(player, T_DATA);
+	Check_Type(name, T_STRING);
 	Check_Type(action, T_FIXNUM);
 	
-	Data_Get_Struct(player, struct player, p);
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return INT2NUM(BJE_NOT_FOUND);
 	
 	return INT2NUM(play_hand(ctx, p, NUM2INT(action)));
 }
@@ -231,6 +233,7 @@ VALUE game_add_player(VALUE self, VALUE name, VALUE balance)
 	Check_Type(balance, T_FLOAT);
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
 	if(!(p = create_player(StringValueCStr(name), NUM2DBL(balance))))
 		return INT2NUM(BJE_ALLOC);
 	
@@ -282,7 +285,10 @@ VALUE game_playing(VALUE self, VALUE name)
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
 		return INT2NUM(BJE_NOT_FOUND);
 	
-	return INT2NUM(playing(p));
+	if(playing(p))
+		return Qtrue;
+	else
+		return Qfalse;
 }
 
 VALUE game_dealer_playing(VALUE self)
@@ -291,7 +297,10 @@ VALUE game_dealer_playing(VALUE self)
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
-	return INT2NUM(dealer_playing(ctx));
+	if(dealer_playing(ctx))
+		return Qtrue;
+	else
+		return Qfalse;
 }
 
 VALUE game_resolve(VALUE self)
