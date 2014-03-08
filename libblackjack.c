@@ -468,6 +468,18 @@ struct card *deal_card(struct blackjack_context *ctx)
 	return c;
 }
 
+struct player *find_player(struct player *plist, char *name)
+{
+	while(plist)
+	{
+		if(strcasecmp(plist->name, name) == 0)
+			break;
+		plist = plist->next;
+	}
+	
+	return plist;
+}
+
 void free_blackjack_context(struct blackjack_context *ctx)
 {
 	if(ctx)

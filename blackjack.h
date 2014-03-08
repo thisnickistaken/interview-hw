@@ -103,6 +103,8 @@ int resolve_game(struct blackjack_context *ctx);
 
 struct card *deal_card(struct blackjack_context *ctx);
 
+struct player *find_player(struct player *plist, char *name);
+
 void free_blackjack_context(struct blackjack_context *ctx);
 void free_player(struct player *p);
 void free_players(struct player *p);
