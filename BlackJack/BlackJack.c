@@ -32,7 +32,7 @@ VALUE game_resolve(VALUE self);
 
 VALUE game_print_player(VALUE self, VALUE name);
 VALUE game_print_dealer(VALUE self);
-VALUE game_print_game(VALUE self);
+VALUE game_print(VALUE self);
 
 void Init_blackjack()
 {
@@ -101,6 +101,10 @@ void Init_blackjack()
 	rb_define_method(cGame, "playing", game_playing, 1);
 	rb_define_method(cGame, "dealer_playing", game_dealer_playing, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
+	
+	rb_define_method(cGame, "print_player", game_print_player, 1);
+	rb_define_method(cGame, "print_dealer", game_print_dealer, 0);
+	rb_define_method(cGame, "print", game_print, 0);
 }
 
 VALUE bj_str_to_suit(VALUE self, VALUE name)
@@ -340,7 +344,7 @@ VALUE game_print_dealer(VALUE self)
 	print_dealer(ctx);
 }
 
-VALUE game_print_game(VALUE self)
+VALUE game_print(VALUE self)
 {
 	struct blackjack_context *ctx = NULL;
 	
