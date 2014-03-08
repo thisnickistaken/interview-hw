@@ -27,7 +27,9 @@ VALUE game_add_player(VALUE self, VALUE name, VALUE balance);
 VALUE game_remove_player(VALUE self, VALUE name);
 VALUE game_place_bet(VALUE self, VALUE name, VALUE bet);
 VALUE game_playing(VALUE self, VALUE name);
+VALUE game_playing_loop(VALUE self, VALUE name);
 VALUE game_dealer_playing(VALUE self);
+VALUE game_dealer_playing_loop(VALUE self);
 VALUE game_resolve(VALUE self);
 
 VALUE game_print_player(VALUE self, VALUE name);
@@ -99,7 +101,9 @@ void Init_blackjack()
 	rb_define_method(cGame, "remove_player", game_remove_player, 1);
 	rb_define_method(cGame, "place_bet", game_place_bet, 2);
 	rb_define_method(cGame, "playing", game_playing, 1);
+	rb_define_method(cGame, "playing_loop", game_playing_loop, 1);
 	rb_define_method(cGame, "dealer_playing", game_dealer_playing, 0);
+	rb_define_method(cGame, "dealer_playing_loop", game_dealer_playing_loop, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
 	
 	rb_define_method(cGame, "print_player", game_print_player, 1);
@@ -299,6 +303,23 @@ VALUE game_playing(VALUE self, VALUE name)
 		return Qfalse;
 }
 
+VALUE game_playing_loop(VALUE self, VALUE name)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	VALUE break_loop = Qfalse;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return INT2NUM(BJE_NOT_FOUND);
+	
+	while(playing(p) && break_loop == Qfalse)
+		break_loop = rb_yield(Qnil);
+	
+	return Qnil;
+}
+
 VALUE game_dealer_playing(VALUE self)
 {
 	struct blackjack_context *ctx = NULL;
@@ -309,6 +330,19 @@ VALUE game_dealer_playing(VALUE self)
 		return Qtrue;
 	else
 		return Qfalse;
+}
+
+VALUE game_dealer_playing_loop(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	VALUE break_loop = Qfalse;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	while(dealer_playing(ctx) && break_loop == Qfalse)
+		break_loop = rb_yield(Qnil);
+	
+	return Qnil;
 }
 
 VALUE game_resolve(VALUE self)
