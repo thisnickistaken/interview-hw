@@ -324,6 +324,8 @@ VALUE game_remove_player(VALUE self, VALUE name)
 	if(NUM2INT(rb_iv_get(self, "@lock")))
 		return INT2NUM(BJE_LOCKED);
 	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
 		return INT2NUM(BJE_NOT_FOUND);
 	
@@ -435,7 +437,7 @@ VALUE game_each_player(VALUE self)
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
-	rb_eval_string("@lock++");
+	rb_iv_set(self, "@lock", INT2NUM(NUM2INT(rb_iv_get(self, "@lock")) + 1));
 	
 	for(p = ctx->seats; p; p = p->next)
 	{
@@ -444,7 +446,7 @@ VALUE game_each_player(VALUE self)
 		rb_yield(rb_eval_string(buf));
 	}
 	
-	rb_eval_string("@lock--");
+	rb_iv_set(self, "@lock", INT2NUM(NUM2INT(rb_iv_get(self, "@lock")) - 1));
 	
 	return INT2NUM(0);	
 }
