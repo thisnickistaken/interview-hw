@@ -64,3 +64,14 @@ unless ret = game.resolve() == 0
 end
 
 game.print()
+
+game.each_player do |player|
+	if player.get_balance == 0
+		puts "#{player.get_name} has run out of money! Retiring player."
+		unless ret = game.remove_player(player.get_name) == 0
+			puts "Error: #{error_to_str(ret)}"
+			exit 1
+		end
+	end
+end
+
