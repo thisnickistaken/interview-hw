@@ -106,6 +106,7 @@ void Init_blackjack()
 	rb_define_const(mBlackJack, "BJE_DUP", INT2NUM(BJE_DUP));
 	rb_define_const(mBlackJack, "BJE_NOT_FOUND", INT2NUM(BJE_NOT_FOUND));
 	rb_define_const(mBlackJack, "BJE_NEG_BET", INT2NUM(BJE_NEG_BET));
+	rb_define_const(mBlackJack, "BJE_LOCKED", INT2NUM(BJE_LOCKED));
 	
 	rb_define_method(mBlackJack, "str_to_suit", bj_str_to_suit, 1);
 	rb_define_method(mBlackJack, "str_to_face", bj_str_to_face, 1);
@@ -248,6 +249,7 @@ VALUE game_initialize(VALUE self)
 		return Qnil;
 	
 	rb_iv_set(self, "@ctx", Data_Wrap_Struct(rb_cObject, NULL, free_blackjack_context, ctx));
+	rb_iv_set(self, "@lock", INT2NUM(0));
 	
 	return self;
 }
@@ -318,6 +320,9 @@ VALUE game_remove_player(VALUE self, VALUE name)
 	int ret;
 	
 	Check_Type(name, T_STRING);
+	
+	if(NUM2INT(rb_iv_get(self, "@lock")))
+		return INT2NUM(BJE_LOCKED);
 	
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
 		return INT2NUM(BJE_NOT_FOUND);
@@ -430,12 +435,16 @@ VALUE game_each_player(VALUE self)
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
+	rb_eval_string("@lock++");
+	
 	for(p = ctx->seats; p; p = p->next)
 	{
 		if(snprintf(buf, 128, "Player.new(\"%s\", %f)", p->name, p->balance) >= 128)
 			return INT2NUM(BJE_ALLOC);
 		rb_yield(rb_eval_string(buf));
 	}
+	
+	rb_eval_string("@lock--");
 	
 	return INT2NUM(0);	
 }

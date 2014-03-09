@@ -42,6 +42,7 @@
 #define BJE_DUP		-11
 #define BJE_NOT_FOUND	-12
 #define BJE_NEG_BET	-13
+#define BJE_LOCKED	-14
 
 #ifdef __cplusplus
 extern "C"

@@ -772,6 +772,8 @@ char *error_to_str(int type)
 			return "Entry not found";
 		case BJE_NEG_BET:
 			return "No negative bets";
+		case BJE_LOCKED:
+			return "List locked for writing";
 		default:
 			return "Unknown error";
 	}
