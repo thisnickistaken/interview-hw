@@ -6,9 +6,9 @@ include BlackJack
 
 game = Game.new()
 
-while !print("Enter player name, leave blank when done: ") && ((player = gets.chomp()) != "") do
-	print "Enter balance for #{player}: "
-	game.add_player(player, gets.chomp().to_f());
+while !print("Enter player name, leave blank when done: ") && ((name = gets.chomp()) != "") do
+	print "Enter balance for #{name}: "
+	game.add_player(name, gets.chomp().to_f());
 end
 
 unless ret = game.shuffle_deck() == 0
@@ -16,10 +16,10 @@ unless ret = game.shuffle_deck() == 0
 	exit 1
 end
 
-game.each_player do |name|
+game.each_player do |player|
 	begin
-		printf "#{name}, enter your wager: "
-		case ret = game.place_bet(name, gets.chomp().to_f())
+		printf "#{player.get_name}, enter your wager: "
+		case ret = game.place_bet(player.get_name, gets.chomp().to_f())
 			when 0
 			when BJE_BET, BJE_NEG_BET
 				puts error_to_str(ret)
@@ -35,11 +35,11 @@ unless ret = game.deal() == 0
 	exit 1
 end
 
-game.each_player do |name|
-	game.playing_loop(name) do
-		game.print_player(name)
-		print "#{name}, what would you like to do? "
-		case ret = game.play_hand(name, str_to_action(gets.chomp()))
+game.each_player do |player|
+	game.playing_loop(player.get_name) do
+		game.print_player(player.get_name)
+		print "#{player.get_name}, what would you like to do? "
+		case ret = game.play_hand(player.get_name, str_to_action(gets.chomp()))
 			when 0
 			when BJE_ACTION, BJE_BET, BJE_FIRST, BJE_SPLIT
 				puts error_to_str(ret)
