@@ -109,6 +109,9 @@ void Init_blackjack()
 	rb_define_method(cGame, "dealer_playing_loop", game_dealer_playing_loop, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
 	
+	rb_define_method(cGame, "each_player", game_each_player, 0);
+	rb_define_method(cGame, "each_hand", game_each_hand, 1);
+	
 	rb_define_method(cGame, "print_player", game_print_player, 1);
 	rb_define_method(cGame, "print_dealer", game_print_dealer, 0);
 	rb_define_method(cGame, "print", game_print, 0);
@@ -310,15 +313,14 @@ VALUE game_playing_loop(VALUE self, VALUE name)
 {
 	struct blackjack_context *ctx = NULL;
 	struct player *p = NULL;
-	VALUE break_loop = Qfalse;
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
 		return INT2NUM(BJE_NOT_FOUND);
 	
-	while(playing(p) && break_loop == Qfalse)
-		break_loop = rb_yield(Qnil);
+	while(playing(p))
+		rb_yield(Qnil);
 	
 	return INT2NUM(0);
 }
@@ -338,12 +340,11 @@ VALUE game_dealer_playing(VALUE self)
 VALUE game_dealer_playing_loop(VALUE self)
 {
 	struct blackjack_context *ctx = NULL;
-	VALUE break_loop = Qfalse;
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
-	while(dealer_playing(ctx) && break_loop == Qfalse)
-		break_loop = rb_yield(Qnil);
+	while(dealer_playing(ctx))
+		rb_yield(Qnil);
 	
 	return INT2NUM(0);
 }
@@ -361,12 +362,11 @@ VALUE game_each_player(VALUE self)
 {
 	struct blackjack_context *ctx = NULL;
 	struct player *p = NULL;
-	VALUE break_loop = Qfalse;
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
-	for(p = ctx->seats; p && break_loop == Qfalse; p = p->next)
-		break_loop = rb_yield(rb_str_new2(p->name));
+	for(p = ctx->seats; p; p = p->next)
+		rb_yield(rb_str_new2(p->name));
 	
 	return INT2NUM(0);	
 }
@@ -376,7 +376,6 @@ VALUE game_each_hand(VALUE self, VALUE name)
 	struct blackjack_context *ctx = NULL;
 	struct player *p = NULL;
 	struct hand *h = NULL;
-	VALUE break_loop = Qfalse;
 	int x = 0;
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
@@ -384,8 +383,8 @@ VALUE game_each_hand(VALUE self, VALUE name)
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
 		return INT2NUM(BJE_NOT_FOUND);
 	
-	for(h = &p->hand; h && break_loop == Qfalse; h = h->split)
-		break_loop = rb_yield(INT2NUM(x++));
+	for(h = &p->hand; h; h = h->split)
+		rb_yield(INT2NUM(x++));
 	
 	return INT2NUM(0);
 }
