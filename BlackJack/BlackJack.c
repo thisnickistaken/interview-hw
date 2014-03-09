@@ -34,6 +34,7 @@ VALUE game_playing_loop(VALUE self, VALUE name);
 VALUE game_dealer_playing(VALUE self);
 VALUE game_dealer_playing_loop(VALUE self);
 VALUE game_resolve(VALUE self);
+VALUE game_players_seated(VALUE self);
 
 VALUE game_each_player(VALUE self);
 VALUE game_get_player_balance(VALUE self, VALUE name);
@@ -132,6 +133,7 @@ void Init_blackjack()
 	rb_define_method(cGame, "dealer_playing", game_dealer_playing, 0);
 	rb_define_method(cGame, "dealer_playing_loop", game_dealer_playing_loop, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
+	rb_define_method(cGame, "Players_seated", game_players_seated, 0);
 	
 	rb_define_method(cGame, "each_player", game_each_player, 0);
 	rb_define_method(cGame, "get_player_balance", game_each_player, 1);
@@ -407,6 +409,17 @@ VALUE game_resolve(VALUE self)
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	return INT2NUM(resolve_game(ctx));
+}
+
+VALUE game_players_seated(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(ctx->seats)
+		return Qtrue;
+	return Qfalse;
 }
 
 VALUE game_each_player(VALUE self)
