@@ -133,7 +133,7 @@ void Init_blackjack()
 	rb_define_method(cGame, "dealer_playing", game_dealer_playing, 0);
 	rb_define_method(cGame, "dealer_playing_loop", game_dealer_playing_loop, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
-	rb_define_method(cGame, "Players_seated", game_players_seated, 0);
+	rb_define_method(cGame, "players_seated", game_players_seated, 0);
 	
 	rb_define_method(cGame, "each_player", game_each_player, 0);
 	rb_define_method(cGame, "get_player_balance", game_each_player, 1);
