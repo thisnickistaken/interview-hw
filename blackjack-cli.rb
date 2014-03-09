@@ -12,7 +12,7 @@ while !print("Enter player name, leave blank when done: ") && ((name = gets.chom
 end
 
 while game.players_seated
-	unless ret = game.shuffle_deck() == 0
+	unless (ret = game.shuffle_deck()) == 0
 		puts "Error: Failed to shuffle deck: #{error_to_str(ret)}"
 		exit 1
 	end
@@ -31,7 +31,7 @@ while game.players_seated
 		end while ret != 0
 	end
 	
-	unless ret = game.deal() == 0
+	unless (ret = game.deal()) == 0
 		puts "Error: #{error_to_str(ret)}"
 		exit 1
 	end
@@ -53,26 +53,31 @@ while game.players_seated
 	
 	game.dealer_playing_loop do
 		game.print_dealer()
-		unless ret = game.play_dealer() == 0
+		unless (ret = game.play_dealer()) == 0
 			puts "Error: #{error_to_str(ret)}"
 			exit 1
 		end
 	end
 	
-	unless ret = game.resolve() == 0
+	unless (ret = game.resolve()) == 0
 		puts "Error: #{error_to_str(ret)}"
 		exit 1
 	end
 	
 	game.print()
 	
+	names = Array.new();
 	game.each_player do |player|
 		if player.get_balance == 0
-			puts "#{player.get_name} has run out of money! Retiring player."
-			unless ret = game.remove_player(player.get_name) == 0
-				puts "Error: #{error_to_str(ret)}"
-				exit 1
-			end
+			puts "#{player.get_name} has run out of money!"
+			names.push(player.get_name)
+		end
+	end
+	names.each do |name|
+		puts "Retiring #{name}."
+		unless (ret = game.remove_player(name)) == 0
+			puts "Error: #{error_to_str(ret)}"
+			exit 1
 		end
 	end
 end	
