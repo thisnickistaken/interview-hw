@@ -4,6 +4,9 @@
 
 VALUE mBlackJack = Qnil;
 VALUE cGame = Qnil;
+VALUE cPlayer = Qnil;
+VALUE cHand = Qnil;
+VALUE cCard = Qnil;
 
 void Init_blackjack();
 
@@ -33,11 +36,32 @@ VALUE game_dealer_playing_loop(VALUE self);
 VALUE game_resolve(VALUE self);
 
 VALUE game_each_player(VALUE self);
+VALUE game_get_player_balance(VALUE self, VALUE name);
+
 VALUE game_each_hand(VALUE self, VALUE name);
+VALUE game_get_hand(VALUE self, VALUE name, VALUE number);
+
+VALUE game_each_card(VALUE self, VALUE name, VALUE hand_number);
+VALUE game_get_card(VALUE self, VALUE name, VALUE hand_number, VALUE card_number);
 
 VALUE game_print_player(VALUE self, VALUE name);
 VALUE game_print_dealer(VALUE self);
 VALUE game_print(VALUE self);
+
+VALUE player_initialize(VALUE self, VALUE name, VALUE balance);
+VALUE player_get_name(VALUE self);
+VALUE player_get_balance(VALUE self);
+VALUE player_print(VALUE self);
+
+VALUE hand_initialize(VALUE self, VALUE state, VALUE bet);
+VALUE hand_get_state(VALUE self);
+VALUE hand_get_bet(VALUE self);
+VALUE hand_print(VALUE self);
+
+VALUE card_initialize(VALUE self, VALUE suit, VALUE value);
+VALUE card_get_suit(VALUE self);
+VALUE card_get_value(VALUE self);
+VALUE card_print(VALUE self);
 
 void Init_blackjack()
 {
@@ -110,11 +134,38 @@ void Init_blackjack()
 	rb_define_method(cGame, "resolve", game_resolve, 0);
 	
 	rb_define_method(cGame, "each_player", game_each_player, 0);
+	rb_define_method(cGame, "get_player_balance", game_each_player, 1);
+	
 	rb_define_method(cGame, "each_hand", game_each_hand, 1);
+	rb_define_method(cGame, "get_hand", game_get_hand, 2);
+	
+	rb_define_method(cGame, "each_card", game_each_card, 2);
+	rb_define_method(cGame, "get_card", game_get_card, 3);
 	
 	rb_define_method(cGame, "print_player", game_print_player, 1);
 	rb_define_method(cGame, "print_dealer", game_print_dealer, 0);
 	rb_define_method(cGame, "print", game_print, 0);
+	
+	cPlayer = rb_define_class_under(mBlackJack, "Player", rb_cObject);
+	
+	rb_define_private_method(cPlayer, "initialize", player_initialize, 2);
+	rb_define_method(cPlayer, "get_name", player_get_name, 0);
+	rb_define_method(cPlayer, "get_balance", player_get_balance, 0);
+	rb_define_method(cPlayer, "print", player_print, 0);
+	
+	cHand = rb_define_class_under(mBlackJack, "Hand", rb_cObject);
+	
+	rb_define_private_method(cHand, "initialize", hand_initialize, 2);
+	rb_define_method(cHand, "get_state", hand_get_state, 0);
+	rb_define_method(cHand, "get_bet", hand_get_bet, 0);
+	rb_define_method(cHand, "print", hand_print, 0);
+	
+	cCard = rb_define_class_under(mBlackJack, "Card", rb_cObject);
+	
+	rb_define_private_method(cCard, "initialize", card_initialize, 2);
+	rb_define_method(cCard, "get_suit", card_get_suit, 0);
+	rb_define_method(cCard, "get_value", card_get_value, 0);
+	rb_define_method(cCard, "get_print", card_print, 0);
 }
 
 VALUE bj_str_to_suit(VALUE self, VALUE name)
@@ -362,13 +413,35 @@ VALUE game_each_player(VALUE self)
 {
 	struct blackjack_context *ctx = NULL;
 	struct player *p = NULL;
+	char buf[128];
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	for(p = ctx->seats; p; p = p->next)
-		rb_yield(rb_str_new2(p->name));
+	{
+		if(snprintf(buf, 128, "Player.new(\"%s\", %f)", p->name, p->balance) >= 128)
+			return INT2NUM(BJE_ALLOC);
+		rb_yield(rb_eval_string(buf));
+	}
 	
 	return INT2NUM(0);	
+}
+
+VALUE game_get_player(VALUE self, VALUE name)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	char buf[128];
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return Qnil;
+	
+	if(snprintf(buf, 128, "Player.new(\"%s\", %f)", p->name, p->balance) >= 128)
+		return Qnil;
+	
+	return rb_eval_string(buf);
 }
 
 VALUE game_each_hand(VALUE self, VALUE name)
@@ -376,7 +449,7 @@ VALUE game_each_hand(VALUE self, VALUE name)
 	struct blackjack_context *ctx = NULL;
 	struct player *p = NULL;
 	struct hand *h = NULL;
-	int x = 0;
+	char buf[32];
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
@@ -384,9 +457,98 @@ VALUE game_each_hand(VALUE self, VALUE name)
 		return INT2NUM(BJE_NOT_FOUND);
 	
 	for(h = &p->hand; h; h = h->split)
-		rb_yield(INT2NUM(x++));
+	{
+		if(snprintf(buf, 32, "Hand.new(%d, %f)", h->state, h->bet) >= 32)
+			return INT2NUM(BJE_ALLOC);
+		rb_yield(rb_eval_string(buf));
+	}
 	
 	return INT2NUM(0);
+}
+
+VALUE game_get_hand(VALUE self, VALUE name, VALUE number)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	struct hand *h = NULL;
+	char buf[32];
+	int x = 0;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return Qnil;
+	
+	for(h = &p->hand; h && x++ < NUM2INT(number); h = h->split);
+	
+	if(h)
+	{
+		if(snprintf(buf, 32, "Hand.new(%d, %f)", h->state, h->bet) >= 32)
+			return Qnil;
+		return rb_eval_string(buf);
+	}
+	
+	return Qnil;	
+}
+
+VALUE game_each_card(VALUE self, VALUE name, VALUE hand_number)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	struct hand *h = NULL;
+	struct card *c = NULL;
+	char buf[32];
+	int x = 0;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return INT2NUM(BJE_NOT_FOUND);
+	
+	for(h = &p->hand; h && x++ < NUM2INT(hand_number); h = h->split);
+	
+	if(!h)
+		return INT2NUM(BJE_NOT_FOUND);
+	
+	for(c = h->cards; c; c = c->next)
+	{
+		if(snprintf(buf, 32, "Card.new(%d, %d)", c->suit, c->value) >= 32)
+			return INT2NUM(BJE_ALLOC);
+		rb_yield(rb_eval_string(buf));
+	}
+	
+	return INT2NUM(0);
+}
+
+VALUE game_get_card(VALUE self, VALUE name, VALUE hand_number, VALUE card_number)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	struct hand *h = NULL;
+	struct card *c = NULL;
+	char buf[32];
+	int x = 0, y = 0;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
+		return Qnil;
+	
+	for(h = &p->hand; h && x++ < NUM2INT(hand_number); h = h->split);
+	
+	if(!h)
+		return Qnil;
+	
+	for(c = h->cards; c && y++ < NUM2INT(card_number); c = c->next);
+	
+	if(c)
+	{
+		if(snprintf(buf, 32, "Card.new(%d, %d)", c->suit, c->value) >= 32)
+			return INT2NUM(BJE_ALLOC);
+		return rb_eval_string(buf);
+	}
+	
+	return Qnil;
 }
 
 VALUE game_print_player(VALUE self, VALUE name)
@@ -420,5 +582,97 @@ VALUE game_print(VALUE self)
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	print_game(ctx);
+}
+
+VALUE player_initialize(VALUE self, VALUE name, VALUE balance)
+{
+	rb_iv_set(self, "@name", name);
+	rb_iv_set(self, "@balance", balance);
+	
+	return self;
+}
+
+VALUE player_get_name(VALUE self)
+{
+	return rb_iv_get(self, "@name");
+}
+
+VALUE player_get_balance(VALUE self)
+{
+	return rb_iv_get(self, "@balance");
+}
+
+VALUE player_print(VALUE self)
+{
+	struct player p;
+	VALUE name = Qnil;
+	
+	memset(&p, 0, sizeof(struct player));
+	name = rb_iv_get(self, "@name");
+	p.name = StringValueCStr(name);
+	p.balance = NUM2DBL(rb_iv_get(self, "@balance"));
+	print_player(&p);
+	
+	return Qnil;
+}
+
+VALUE hand_initialize(VALUE self, VALUE state, VALUE bet)
+{
+	rb_iv_set(self, "@state", state);
+	rb_iv_set(self, "@bet", bet);
+	
+	return self;
+}
+
+VALUE hand_get_state(VALUE self)
+{
+	return rb_iv_get(self, "@state");
+}
+
+VALUE hand_get_bet(VALUE self)
+{
+	return rb_iv_get(self, "@bet");
+}
+
+VALUE hand_print(VALUE self)
+{
+	struct hand h;
+	
+	memset(&h, 0, sizeof(struct hand));
+	h.state = NUM2INT(rb_iv_get(self, "@state"));
+	h.bet = NUM2DBL(rb_iv_get(self, "@bet"));
+	print_hand(&h);
+	
+	return Qnil;
+}
+
+VALUE card_initialize(VALUE self, VALUE suit, VALUE value)
+{
+	rb_iv_set(self, "@suit", suit);
+	rb_iv_set(self, "@value", value);
+	
+	return self;
+}
+
+VALUE card_get_suit(VALUE self)
+{
+	return rb_iv_get(self, "@suit");
+}
+
+VALUE card_get_value(VALUE self)
+{
+	return rb_iv_get(self, "@value");
+}
+
+VALUE card_print(VALUE self)
+{
+	struct card c;
+	
+	memset(&c, 0, sizeof(struct card));
+	c.suit = NUM2INT(rb_iv_get(self, "@suit"));
+	c.value = NUM2INT(rb_iv_get(self, "@value"));
+	print_card(&c);
+	
+	return Qnil;
 }
 
