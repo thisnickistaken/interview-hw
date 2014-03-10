@@ -1,6 +1,8 @@
 #ifndef _BLACKJACK_INCLUDE
 #define _BLACKJACK_INCLUDE	1
 
+#include <stdint.h>
+
 #define SUIT_HEARTS	1
 #define SUIT_DIAMONDS	2
 #define SUIT_CLUBS	3
@@ -85,9 +87,18 @@ struct blackjack_context
 	struct player *seats;
 };
 
+struct gamestate_header
+{
+	uint32_t length;
+	uint8_t data[];
+};
+
 struct blackjack_context *create_blackjack_context();
 struct player *create_player(char *name, float balance);
 struct hand *create_hand(float bet);
+
+struct gamestate_header *create_gamestate_image(struct blackjack_context *ctx);
+struct blackjack_context *read_gamestate_image(struct gamestate_header *head);
 
 int shuffle_deck(struct blackjack_context *ctx);
 int deal_game(struct blackjack_context *ctx);
