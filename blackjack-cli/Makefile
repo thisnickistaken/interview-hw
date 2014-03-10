@@ -1,8 +1,6 @@
 prefix=/usr
 bin=$(prefix)/bin
 
-ldconfig=/sbin/ldconfig
-
 CFLAGS=-O1
 
 all:
