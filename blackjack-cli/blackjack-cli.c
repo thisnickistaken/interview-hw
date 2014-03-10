@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "blackjack.h"
+#include <blackjack.h>
 
 #define INPUT_BUFSZ	32
 

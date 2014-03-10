@@ -1,0 +1,139 @@
+#!/bin/bash
+if [[ "$1" != "" ]]; then
+	HOST="$1"
+else
+	HOST=""
+fi
+SRV="/var/www/"
+DROOT="$SRV/localhost/htdocs/praeses-interview"
+CGIROOT="$SRV/localhost/cgi-bin"
+JS="$DROOT/js"
+IMG="$DROOT/images"
+
+WWWUSER="apache"
+WWWGROUP="apache"
+
+CHOWN="/bin/chown"
+MKDIR="/bin/mkdir"
+RSYNC="/usr/bin/rsync -a --delete"
+SSH="/usr/bin/ssh"
+
+if [[ "$HOST" != "" ]]; then
+	if $SSH $HOST "[[ ! -d \"$SRV\" ]]" ; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+else
+	if [[ ! -d "$SRV" ]]; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+fi
+if [[ $CHECK == 1 ]]; then
+	echo "Server Directory does not exist."
+	exit 1
+fi
+if [[ "$HOST" != "" ]]; then
+	if $SSH $HOST "[[ ! -d \"$DROOT\" ]]" ; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+else
+	if [[ ! -d "$DROOT" ]]; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+fi
+if [[ $CHECK == 1 ]]; then
+	echo "Document root does not exist. Creating it now..."
+	if [[ "$HOST" != "" ]]; then
+		$SSH $HOST "$MKDIR \"$DROOT\""
+	else
+		$MKDIR "$DROOT"
+	fi
+	if [[ "$?" != "0" ]]; then
+		echo "An attempt to create the document root failed."
+		exit 1
+	fi
+fi
+
+if [[ "$HOST" != "" ]]; then
+	if $SSH $HOST "[[ ! -d \"$CGIROOT\" ]]" ; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+else
+	if [[ ! -d "$CGIROOT" ]]; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+fi
+if [[ $CHECK == 1 ]]; then
+	echo "CGI root does not exist. Creating it now..."
+	if [[ "$HOST" != "" ]]; then
+		$SSH $HOST "$MKDIR \"$CGIROOT\""
+	else
+		$MKDIR "$CGIROOT"
+	fi
+	if [[ "$?" != "0" ]]; then
+		echo "An attempt to create the CGI root failed."
+		exit 1
+	fi
+fi
+
+if [[ "$HOST" != "" ]]; then
+	$RSYNC html/*.html html/*.css $HOST:$DROOT/
+else
+	$RSYNC html/*.html html/*.css $DROOT/
+fi
+if [[ "$HOST" != "" ]]; then
+	if $SSH $HOST "[[ ! -d \"$JS\" ]]" ; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+else
+	if [[ ! -d "$JS" ]]; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+fi
+if [[ $CHECK == 1 ]]; then
+	echo "JavaScript directory does not exist. Creating it now..."
+	if [[ "$HOST" != "" ]]; then
+		$SSH $HOST "$MKDIR \"$JS\""
+	else
+		$MKDIR "$JS"
+	fi
+	if [[ "$?" != "0" ]]; then
+		echo "An attempt to create the JavaScript directory failed."
+		exit 1
+	fi
+fi
+if [[ "$HOST" != "" ]]; then
+	if $SSH $HOST "[[ ! -d \"$UPLOAD\" ]]" ; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+else
+	if [[ ! -d "$UPLOAD" ]]; then
+		CHECK=1
+	else
+		CHECK=0
+	fi
+fi
+if [[ "$HOST" != "" ]]; then
+	$RSYNC js/*.js $HOST:$JS/
+	$RSYNC images/ $HOST:$IMG/
+else
+	$RSYNC js/*.js $JS/
+	$RSYNC images/ $IMG/
+fi
