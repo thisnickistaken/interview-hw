@@ -36,6 +36,9 @@ VALUE game_dealer_playing_loop(VALUE self);
 VALUE game_resolve(VALUE self);
 VALUE game_players_seated(VALUE self);
 
+VALUE game_save(VALUE self);
+VALUE game_restore(VALUE self, VALUE image);
+
 VALUE game_each_player(VALUE self);
 VALUE game_get_player_balance(VALUE self, VALUE name);
 
@@ -135,6 +138,9 @@ void Init_blackjack()
 	rb_define_method(cGame, "dealer_playing_loop", game_dealer_playing_loop, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
 	rb_define_method(cGame, "players_seated", game_players_seated, 0);
+	
+	rb_define_method(cGame, "save", game_save, 0);
+	rb_define_method(cGame, "restore", game_restore, 1);
 	
 	rb_define_method(cGame, "each_player", game_each_player, 0);
 	rb_define_method(cGame, "get_player_balance", game_each_player, 1);
@@ -429,6 +435,44 @@ VALUE game_players_seated(VALUE self)
 	if(ctx->seats)
 		return Qtrue;
 	return Qfalse;
+}
+
+VALUE game_save(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	struct gamestate_header *head = NULL;
+	VALUE ret;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(head = create_gamestate_image(ctx)))
+		return Qnil;
+	
+	ret = rb_str_new(head->data, head->length);
+	free(head);
+	
+	return ret;
+}
+
+VALUE game_restore(VALUE self, VALUE image)
+{
+	struct blackjack_context *ctx = NULL;
+	struct gamestate_header *head = NULL;
+	
+	Check_Type(image, T_STRING);
+	
+	if(!(head = malloc(sizeof(struct gamestate_header) + RSTRING_LEN(image))))
+		return INT2NUM(BJE_ALLOC);
+	head->length = RSTRING_LEN(image);
+	memcpy(head->data, RSTRING_PTR(image), head->length);
+	
+	if(!(ctx = read_gamestate_image(head)))
+		return INT2NUM(BJE_ALLOC);
+	
+	free(head);
+	rb_iv_set(self, "@ctx", Data_Wrap_Struct(rb_cObject, NULL, free_blackjack_context, ctx));
+	
+	return INT2NUM(0);
 }
 
 VALUE game_each_player(VALUE self)
