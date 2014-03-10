@@ -1,0 +1,26 @@
+This project consists of several sub-projects designed to interoperate and build upon each other.
+They must be built in order of dependency.
+
+To build and install:
+
+cd libblackjack
+make
+make install
+cd ..
+cd blackjack-cli
+make
+make install
+cd ..
+cd blackjack-rbext
+./extconf.rb
+make
+make install
+cd ..
+cd blackjack-ruby
+make install
+cd ..
+cd blackjack-web
+./cp2http		# You may specify a host to upload to if you have access via ssh, otherwise it installs locally
+cd ..
+
+
