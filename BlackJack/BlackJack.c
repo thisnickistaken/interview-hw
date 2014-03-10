@@ -374,6 +374,8 @@ VALUE game_playing_loop(VALUE self, VALUE name)
 	struct blackjack_context *ctx = NULL;
 	struct player *p = NULL;
 	
+	Check_Type(name, T_STRING);
+	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
@@ -457,6 +459,8 @@ VALUE game_get_player(VALUE self, VALUE name)
 	struct player *p = NULL;
 	char buf[128];
 	
+	Check_Type(name, T_STRING);
+	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
@@ -474,6 +478,8 @@ VALUE game_each_hand(VALUE self, VALUE name)
 	struct player *p = NULL;
 	struct hand *h = NULL;
 	char buf[32];
+	
+	Check_Type(name, T_STRING);
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
@@ -497,6 +503,9 @@ VALUE game_get_hand(VALUE self, VALUE name, VALUE number)
 	struct hand *h = NULL;
 	char buf[32];
 	int x = 0;
+	
+	Check_Type(name, T_STRING);
+	Check_Type(number, T_FIXNUM);
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
@@ -523,6 +532,9 @@ VALUE game_each_card(VALUE self, VALUE name, VALUE hand_number)
 	struct card *c = NULL;
 	char buf[32];
 	int x = 0;
+	
+	Check_Type(name, T_STRING);
+	Check_Type(hand_number, T_FIXNUM);
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
@@ -552,6 +564,10 @@ VALUE game_get_card(VALUE self, VALUE name, VALUE hand_number, VALUE card_number
 	struct card *c = NULL;
 	char buf[32];
 	int x = 0, y = 0;
+	
+	Check_Type(name, T_STRING);
+	Check_Type(hand_number, T_FIXNUM);
+	Check_Type(card_number, T_FIXNUM);
 	
 	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
 	
@@ -610,6 +626,9 @@ VALUE game_print(VALUE self)
 
 VALUE player_initialize(VALUE self, VALUE name, VALUE balance)
 {
+	Check_Type(name, T_STRING);
+	Check_Type(balance, T_FLOAT);
+	
 	rb_iv_set(self, "@name", name);
 	rb_iv_set(self, "@balance", balance);
 	
@@ -642,6 +661,9 @@ VALUE player_print(VALUE self)
 
 VALUE hand_initialize(VALUE self, VALUE state, VALUE bet)
 {
+	Check_Type(state, T_FIXNUM);
+	Check_Type(bet, T_FLOAT);
+	
 	rb_iv_set(self, "@state", state);
 	rb_iv_set(self, "@bet", bet);
 	
@@ -672,6 +694,9 @@ VALUE hand_print(VALUE self)
 
 VALUE card_initialize(VALUE self, VALUE suit, VALUE value)
 {
+	Check_Type(suit, T_FIXNUM);
+	Check_Type(value, T_FIXNUM);
+	
 	rb_iv_set(self, "@suit", suit);
 	rb_iv_set(self, "@value", value);
 	
