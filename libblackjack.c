@@ -78,7 +78,7 @@ struct gamestate_header *create_gamestate_image(struct blackjack_context *ctx)
 	{
 		length += sizeof(struct player);
 		if(p->name)
-			length += strlen(p->name);
+			length += strlen(p->name) + 1;
 		for(h = p->hand.split; h; h = h->split)
 			length += sizeof(struct hand);
 	}
@@ -90,7 +90,8 @@ struct gamestate_header *create_gamestate_image(struct blackjack_context *ctx)
 	
 	octx = (void *)head->data;
 	memcpy(octx, ctx, sizeof(struct blackjack_context));
-	octx->shuffled = (void *)ctx->shuffled - (unsigned long)ctx;
+	if(octx->shuffled)
+		octx->shuffled = (void *)ctx->shuffled - (unsigned long)ctx;
 	for(x ^= x; x < MAX_CARDS; x++)
 		if(octx->deck[x].next)
 			octx->deck[x].next = (void *)octx->deck[x].next - (unsigned long)ctx;
@@ -105,9 +106,12 @@ struct gamestate_header *create_gamestate_image(struct blackjack_context *ctx)
 		op = (void *)head->data + offset;
 		memcpy(op, p, sizeof(struct player));
 		offset += sizeof(struct player);
-		strncpy(head->data + offset, p->name, length - offset);
-		op->name = (void *)offset;
-		offset += strlen(p->name);
+		if(p->name)
+		{
+			strncpy(head->data + offset, p->name, (x = strlen(p->name) + 1));
+			op->name = (void *)offset;
+			offset += x;
+		}
 		if(p->hand.cards)
 			op->hand.cards = (void *)op->hand.cards - (unsigned long)ctx;
 		for(h = p->hand.split; h; h = h->split)
@@ -143,14 +147,15 @@ struct blackjack_context *read_gamestate_image(struct gamestate_header *head)
 	
 	ictx = (void *)head->data;
 	memcpy(ctx, ictx, sizeof(struct blackjack_context));
-	ctx->shuffled = (void *)ctx->shuffled - (unsigned long)ctx;
+	if(ctx->shuffled)
+		ctx->shuffled = (void *)ctx->shuffled + (unsigned long)ctx;
 	for(x ^= x; x < MAX_CARDS; x++)
 		if(ctx->deck[x].next)
-			ctx->deck[x].next = (void *)ctx->deck[x].next - (unsigned long)ctx;
+			ctx->deck[x].next = (void *)ctx->deck[x].next + (unsigned long)ctx;
 	if(ctx->dealer.cards)
-		ctx->dealer.cards = (void *)ctx->dealer.cards - (unsigned long)ctx;
+		ctx->dealer.cards = (void *)ctx->dealer.cards + (unsigned long)ctx;
 	ctx->seats = NULL;
-	for(ip = (void *)ictx->seats + (unsigned long)head->data; p != (void *)head->data; p = (void *)p->next + (unsigned long)head->data)
+	for(ip = (void *)ictx->seats + (unsigned long)head->data; ip != (void *)head->data; ip = (void *)ip->next + (unsigned long)head->data)
 	{
 		if(!ctx->seats)
 			p = ctx->seats = malloc(sizeof(struct player));
@@ -160,11 +165,13 @@ struct blackjack_context *read_gamestate_image(struct gamestate_header *head)
 			p = p->next;
 		}
 		memcpy(p, ip, sizeof(struct player));
-		
-		p->name = malloc(strlen(ip->name + (unsigned long)head->data) + 1);
-		strncpy(p->name, (void *)ip->name + (unsigned long)head->data, head->length - (unsigned long)ip->name);
+		if(p->name)
+		{
+			p->name = malloc((x = strlen(ip->name + (unsigned long)head->data) + 1));
+			strncpy(p->name, (void *)ip->name + (unsigned long)head->data, x);
+		}
 		if(p->hand.cards)
-			p->hand.cards = (void *)p->hand.cards - (unsigned long)ctx;
+			p->hand.cards = (void *)p->hand.cards + (unsigned long)ctx;
 		p->hand.split = NULL;
 		for(ih = (void *)ip->hand.split + (unsigned long)head->data; ih != (void *)head->data; ih = (void *)ih->split + (unsigned long)head->data)
 		{
@@ -177,7 +184,7 @@ struct blackjack_context *read_gamestate_image(struct gamestate_header *head)
 			}
 			memcpy(h, ih, sizeof(struct hand));
 			if(h->cards)
-				h->cards =  (void *)h->cards - (unsigned long)ctx;
+				h->cards =  (void *)h->cards + (unsigned long)ctx;
 		}
 	}
 	return ctx;
