@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#define SUIT_HEARTS	1
+#define SUIT_HEARTS	3
 #define SUIT_DIAMONDS	2
-#define SUIT_CLUBS	3
+#define SUIT_CLUBS	1
 #define SUIT_SPADES	4
 
 #define FACE_JACK	11
