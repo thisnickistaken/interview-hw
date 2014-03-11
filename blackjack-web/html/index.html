@@ -4,7 +4,9 @@
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 		<title>BlackJack Web Interface</title>
 		<link rel="stylesheet" type="text/css" href="main.css" />
+		<script type="text/JavaScript" src="js/ajax.js"></script>
 		<script type="text/JavaScript" src="js/cards.js"></script>
+		<script type="text/JavaScript" src="js/action.js"></script>
 		<script type="text/JavaScript">
 		<!--
 		    	function init()
@@ -25,8 +27,16 @@
 			</form>
 		</div>
 		<div id="game" class="center">
+			<h4 id="player"></h4>
 			<div id="cards">
 			</div>
+			<form id="player">
+				<input name="hit" type="button" value="Hit" onclick="play_hand(this.name)" />
+				<input name="stand" type="button" value="Stand" onclick="play_hand(this.name)" />
+				<input name="dd" type="button" value="Double Down" onclick="play_hand(this.name)" />
+				<input name="split" type="button" value="Split" onclick="play_hand(this.name)" />
+				<input name="surrender" type="button" value="Surrender" onclick="play_hand(this.name)" />
+			</form>
 		</div>
 	</body>
 </html>
