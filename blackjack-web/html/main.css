@@ -15,6 +15,7 @@ div.cards
 div#cards
 {
 	width: 0px;
+	height: 123px;
 	margin:0 auto;
 }
 
