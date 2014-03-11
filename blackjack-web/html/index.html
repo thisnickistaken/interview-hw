@@ -4,10 +4,29 @@
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 		<title>BlackJack Web Interface</title>
 		<link rel="stylesheet" type="text/css" href="main.css" />
+		<script type="text/JavaScript" src="js/cards.js"></script>
+		<script type="text/JavaScript">
+		<!--
+		    	function init()
+			{
+				add_card(1, 2);
+				add_card(1, 10);
+			}
+		//-->
+		</script>
 	</head>
-	<body>
+	<body onload="init()">
 		<div class="center">
 			<h3>Blackjack Game</h3>
+			<form id="control">
+				<div>
+					<h4>Game Name:</h4><input name="name" type="text" /><input name="load" type="button" value="Load" onclick="load_game()" /><input name="new" type="button" value="New" onclick="new_game()" />
+				</div>
+			</form>
+		</div>
+		<div id="game" class="center">
+			<div id="cards">
+			</div>
 		</div>
 	</body>
 </html>
