@@ -89,8 +89,10 @@ fi
 
 if [[ "$HOST" != "" ]]; then
 	$RSYNC html/*.html html/*.css html/*.json $HOST:$DROOT/
+	$RSYNC cgi/*.cgi $HOST:$CGIROOT/
 else
 	$RSYNC html/*.html html/*.css html/*.json $DROOT/
+	$RSYNC cgi/*.cgi $CGIROOT/
 fi
 if [[ "$HOST" != "" ]]; then
 	if $SSH $HOST "[[ ! -d \"$JS\" ]]" ; then
