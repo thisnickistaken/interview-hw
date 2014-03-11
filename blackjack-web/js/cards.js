@@ -1,3 +1,12 @@
+var SUIT_HEARTS = 3
+var SUIT_DIAMONDS = 2
+var SUIT_CLUBS = 1
+var SUIT_SPADES = 4
+
+var FACE_JACK = 11
+var FACE_QUEEN = 12
+var FACE_KING = 13
+
 var cards = 0;
 
 function add_card(suit, value)
