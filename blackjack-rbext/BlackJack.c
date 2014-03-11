@@ -48,6 +48,9 @@ VALUE game_get_hand(VALUE self, VALUE name, VALUE number);
 VALUE game_each_card(VALUE self, VALUE name, VALUE hand_number);
 VALUE game_get_card(VALUE self, VALUE name, VALUE hand_number, VALUE card_number);
 
+VALUE game_each_dealer_card(VALUE self);
+VALUE game_get_dealer_state(VALUE self);
+
 VALUE game_print_player(VALUE self, VALUE name);
 VALUE game_print_dealer(VALUE self);
 VALUE game_print(VALUE self);
@@ -150,6 +153,9 @@ void Init_blackjack()
 	
 	rb_define_method(cGame, "each_card", game_each_card, 2);
 	rb_define_method(cGame, "get_card", game_get_card, 3);
+	
+	rb_define_method(cGame, "each_dealer_card", game_each_dealer_card, 0);
+	rb_define_method(cGame, "get_dealer_state", game_get_dealer_state, 0);
 	
 	rb_define_method(cGame, "print_player", game_print_player, 1);
 	rb_define_method(cGame, "print_dealer", game_print_dealer, 0);
@@ -633,6 +639,33 @@ VALUE game_get_card(VALUE self, VALUE name, VALUE hand_number, VALUE card_number
 	}
 	
 	return Qnil;
+}
+
+VALUE game_each_dealer_card(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	struct card *c = NULL;
+	char buf[32];
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	for(c = ctx->dealer.cards; c; c = c->next)
+	{
+		if(snprintf(buf, 32, "Card.new(%d, %d)", c->suit, c->value) >= 32)
+			return INT2NUM(BJE_ALLOC);
+		rb_yield(rb_eval_string(buf));
+	}
+	
+	return INT2NUM(0);
+}
+
+VALUE game_get_dealer_state(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	return INT2NUM(ctx->dealer.state);
 }
 
 VALUE game_print_player(VALUE self, VALUE name)
