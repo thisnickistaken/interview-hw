@@ -12,8 +12,8 @@ int main(int argc, char **argv)
 	add_player(&ctx->seats, create_player("Steven", 1000.0f));
 	add_player(&ctx->seats, create_player("Moo Cow", 2000.0f));
 	shuffle_deck(ctx);
-	place_bet(find_player(ctx->seats, "Steven"), 1000.0f);
-	place_bet(find_player(ctx->seats, "Moo Cow"), 1000.0f);
+	place_bet(ctx, find_player(ctx->seats, "Steven"), 1000.0f);
+	place_bet(ctx, find_player(ctx->seats, "Moo Cow"), 1000.0f);
 	deal_game(ctx);
 	print_game(ctx);
 	head = create_gamestate_image(ctx);

@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 			z ^= z;
-			switch(x = place_bet(p, atof(run->buf)))
+			switch(x = place_bet(run->ctx, p, atof(run->buf)))
 			{
 				case 0:
 					p = p->next;
