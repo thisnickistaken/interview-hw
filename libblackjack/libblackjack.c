@@ -91,11 +91,11 @@ struct gamestate_header *create_gamestate_image(struct blackjack_context *ctx)
 	octx = (void *)head->data;
 	memcpy(octx, ctx, sizeof(struct blackjack_context));
 	if(octx->shuffled)
-		octx->shuffled = (void *)ctx->shuffled - (unsigned long)ctx;
+		octx->shuffled = (void *)octx->shuffled - (unsigned long)ctx;
 	for(x ^= x; x < MAX_CARDS; x++)
 		if(octx->deck[x].next)
 			octx->deck[x].next = (void *)octx->deck[x].next - (unsigned long)ctx;
-	if(octx->dealer.cards);
+	if(octx->dealer.cards)
 		octx->dealer.cards = (void *)octx->dealer.cards - (unsigned long)ctx;
 	if(octx->seats)
 		octx->seats = (void *)sizeof(struct blackjack_context);
@@ -187,6 +187,7 @@ struct blackjack_context *read_gamestate_image(struct gamestate_header *head)
 				h->cards =  (void *)h->cards + (unsigned long)ctx;
 		}
 	}
+	
 	return ctx;
 }
 
@@ -201,6 +202,9 @@ int shuffle_deck(struct blackjack_context *ctx)
 		return BJE_ARGS;
 	
 	setstate(ctx->rand_state);
+	
+	if(ctx->dealer.state == HAND_IN_PLAY && ctx->dealer.cards)
+		return BJE_ORDER;
 	
 	for(p = ctx->seats; p; p = p->next)
 		free_hand(p);
@@ -236,22 +240,28 @@ int deal_game(struct blackjack_context *ctx)
 {
 	struct player *p = NULL;
 	struct card *c = NULL;
-	int x;
+	int x = 0;
 
 	if(!ctx)
 		return BJE_ARGS;
 	
+	if(card_count(ctx->shuffled) < MAX_CARDS)
+		return BJE_ORDER;
+	
+	x ^= x;
 	for(p = ctx->seats; p; p = p->next)
 	{
 		if(p->hand.bet > 0)
 		{
 			if(!(c = p->hand.cards = deal_card(ctx)))
 				return BJE_DEAL;
+			x++;
 		}
 		else
 			p->hand.state = HAND_WATCHING;
-
 	}
+	if(!x)
+		return BJE_NOP;
 	if(!(c = ctx->dealer.cards = deal_card(ctx)))
 		return BJE_DEAL;
 	
@@ -285,11 +295,17 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action)
 	if(!p)
 		return BJE_ARGS;
 	
+	if(p != controlling_player(ctx->seats))
+		return BJE_ORDER;
+	
 	for(h = &p->hand; h; h = h->split)
 		if(h->state == HAND_IN_PLAY)
 			break;
 	if(!h)
 		return BJE_NOP;
+	
+	if(!h->cards)
+		return BJE_ORDER;
 	
 	switch(action)
 	{
@@ -416,6 +432,19 @@ int card_value_sum(struct card *c)
 	return total;
 }
 
+int card_count(struct card *c)
+{
+	int x = 0;
+	
+	while(c)
+	{
+		x++;
+		c = c->next;
+	}
+	
+	return x;
+}
+
 int add_player(struct player **plist, struct player *p)
 {
 	struct player *ptmp = NULL, *last = NULL;
@@ -423,6 +452,8 @@ int add_player(struct player **plist, struct player *p)
 	if(!plist || !p)
 		return BJE_ARGS;
 	
+	if(controlling_player(*plist))
+		return BJE_ORDER;
 	for(ptmp = *plist; ptmp; ptmp = ptmp->next)
 	{
 		if(strcasecmp(ptmp->name, p->name) == 0)
@@ -445,6 +476,8 @@ int remove_player(struct player **plist, struct player *p)
 		return BJE_ARGS;
 	if(!*plist)
 		return BJE_NOP;
+	if(controlling_player(*plist))
+		return BJE_ORDER;
 	
 	if(*plist == p)
 	{
@@ -466,18 +499,21 @@ int remove_player(struct player **plist, struct player *p)
 	return BJE_NOT_FOUND;
 }
 
-int place_bet(struct player *p, float bet)
+int place_bet(struct blackjack_context *ctx, struct player *p, float bet)
 {
 	float tmp;
-
+	
 	if(!p)
 		return BJE_ARGS;
 	
 	if(bet < 0)
 		return BJE_NEG_BET;
 	
-	if(bet > p->balance)
+	if(bet > (p->balance + p->hand.bet))
 		return BJE_BET;
+	
+	if(card_count(ctx->shuffled) < MAX_CARDS)
+		return BJE_ORDER;
 	
 	tmp = bet - p->hand.bet;
 	p->hand.bet = bet;
@@ -602,6 +638,23 @@ struct player *find_player(struct player *plist, char *name)
 	while(plist)
 	{
 		if(strcasecmp(plist->name, name) == 0)
+			break;
+		plist = plist->next;
+	}
+	
+	return plist;
+}
+
+struct player *controlling_player(struct player *plist)
+{
+	struct hand *h = NULL;
+	
+	while(plist)
+	{
+		for(h = &plist->hand; h; h = h->split)
+			if(h->state == HAND_IN_PLAY)
+				break;
+		if(h)
 			break;
 		plist = plist->next;
 	}
@@ -903,6 +956,8 @@ char *error_to_str(int type)
 			return "No negative bets";
 		case BJE_LOCKED:
 			return "List locked for writing";
+		case BJE_ORDER:
+			return "Operation out of order";
 		default:
 			return "Unknown error";
 	}

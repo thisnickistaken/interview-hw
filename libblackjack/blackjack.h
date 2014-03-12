@@ -45,6 +45,7 @@
 #define BJE_NOT_FOUND	-12
 #define BJE_NEG_BET	-13
 #define BJE_LOCKED	-14
+#define BJE_ORDER	-15
 
 #ifdef __cplusplus
 extern "C"
@@ -76,8 +77,8 @@ struct player
 
 struct blackjack_context
 {
-	struct card deck[MAX_CARDS];
 	struct card *shuffled;
+	struct card deck[MAX_CARDS];
 	char rand_state[MAX_RAND];
 	struct dealer
 	{
@@ -106,9 +107,10 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action);
 int play_dealer(struct blackjack_context *ctx);
 int card_value(struct card *c);
 int card_value_sum(struct card *c);
+int card_count(struct card *c);
 int add_player(struct player **plist, struct player *p);
 int remove_player(struct player **plist, struct player *p);
-int place_bet(struct player *p, float bet);
+int place_bet(struct blackjack_context *ctx, struct player *p, float bet);
 int playing(struct player *p);
 int dealer_playing(struct blackjack_context *ctx);
 int resolve_game(struct blackjack_context *ctx);
@@ -116,6 +118,7 @@ int resolve_game(struct blackjack_context *ctx);
 struct card *deal_card(struct blackjack_context *ctx);
 
 struct player *find_player(struct player *plist, char *name);
+struct player *controlling_player(struct player *plist);
 
 void free_blackjack_context(struct blackjack_context *ctx);
 void free_player(struct player *p);
