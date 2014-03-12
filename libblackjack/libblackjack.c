@@ -207,6 +207,19 @@ int shuffle_deck(struct blackjack_context *ctx)
 		return BJE_ORDER;
 	
 	for(p = ctx->seats; p; p = p->next)
+	{
+		for(h = &p->hand; h; h = h->split)
+		{
+			if(h->state == HAND_IN_PLAY && h->bet != 0)
+				break;
+		}
+		if(h)
+			break;
+	}
+	if(p)
+		return BJE_ORDER;
+	
+	for(p = ctx->seats; p; p = p->next)
 		free_hand(p);
 	memset(&ctx->dealer, 0, sizeof(struct dealer));
 	
