@@ -1,6 +1,11 @@
 This project consists of several sub-projects designed to interoperate and build upon each other.
 They must be built in order of dependency.
 
+blackjack-web and blackjack-ruby depend on blackjack-rbext
+blackjack-rbext and blackjack-cli depends on libblackjack
+
+The ruby packages depend on Ruby and blackjack-web usees the "cgi" Gem.
+
 To build and install:
 
 cd libblackjack
@@ -23,4 +28,47 @@ cd blackjack-web
 ./cp2http		# You may specify a host to upload to if you have access via ssh, otherwise it installs locally
 cd ..
 
+------------
+libblackjack
+------------
+This is a library containing all of the core game logic.  Everything else depends on this library.
 
+-------------
+blackjack-cli
+-------------
+This is a set of command line based driver programs for libblackjack.  The test should largely be ignored; it is in the version conrtol system simply to track any test I have made.  'blackjack-cli' has a usage statement that appears if it is run with the '-h' flag.  Specifying '-b <value>' changes the default balance for players specified on the command line after this instance of '-b' but before any other instances of '-b'. '-p <name>' is used to specify players.  It is completely valid to do something like "blackjack-cli -b 2000 -p 'John Doe' -b 5000 -p 'Bob Smith'".  Once started, the game is interactive.
+
+Actions:
+	Hit		--	"hit", "h"
+	Stand/Stay	--	"stand", "stay", "st"
+	Double Down	--	"double down", "double", "dd"
+	Split		--	"split", "sp"
+	Surrender	--	"surrender", "sur"
+
+Actions can be any case.
+
+---------------
+blackjack-rbext
+---------------
+This is a Ruby extension that wraps libblackjack for use in Ruby.  It provides the The Game object is built around the blackjack_context structure from libblackjack.  Player, Hand and Card structures are read-only copies of data linked into the context.  This may be able to be changed with a bit more digging into the Ruby Garbage Collector.
+
+--------------
+blackjack-ruby
+--------------
+This is a set of command line Ruby scripts for the blackjack extension/BlackJack module.  'blackjack-cli.rb' behaves in very uch the same way as 'blackjack-cli' except it is fully interactive and does not take command line arguments.  The test in here should once again be largely ignored.  If it doesn't run at all, there are issues. ;)
+
+-------------
+blackjack-web
+-------------
+This is a web-gui built with HTML, JavaScript, CSS, AJAX (AJAJ really), and Ruby.  It is limited in it's prettiness, but I'm finding less and less ways to break it.
+
+Basic concepts here to keep any frustration to a minimum are:
+
+-Start a game by entering a name in the text box at the top of the page and clicking the 'New' button.
+-To add players to the game, fill in a name and amount for initial balance at the bottom of the page and click the 'Add' button. You may do this as many times as you'd like; however, the game will fail to deal if there are more than 24 players ((52/2) - 1(dealer) = 25) as it only uses one deck currently.
+-Place bets!  Since a new game is shuffled automatically, you can place bets as soon as players are added.  Enter a value in the 'Amount' field and click 'Place Bet'.  (You can select the players by clicking on them in the list at the bottom of the screen.)
+-Click 'Deal Game' to deal cards.
+-Use the appropriate buttons to play your hand.  Hands will progress in order until all players have played.  Then the dealer plays and all hands cycle on screen to show the outcome.
+-At game end, you must shuffle by pressing the 'Shuffle' button.  Then you may place bets and deal a new game.
+
+Games are saved between each play and can be recalled at any point by entering the name and clicking load.
