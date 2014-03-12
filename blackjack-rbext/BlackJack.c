@@ -35,6 +35,7 @@ VALUE game_dealer_playing(VALUE self);
 VALUE game_dealer_playing_loop(VALUE self);
 VALUE game_resolve(VALUE self);
 VALUE game_players_seated(VALUE self);
+VALUE game_shuffled_cards(VALUE self);
 
 VALUE game_save(VALUE self);
 VALUE game_restore(VALUE self, VALUE image);
@@ -113,6 +114,7 @@ void Init_blackjack()
 	rb_define_const(mBlackJack, "BJE_NOT_FOUND", INT2NUM(BJE_NOT_FOUND));
 	rb_define_const(mBlackJack, "BJE_NEG_BET", INT2NUM(BJE_NEG_BET));
 	rb_define_const(mBlackJack, "BJE_LOCKED", INT2NUM(BJE_LOCKED));
+	rb_define_const(mBlackJack, "BJE_ORDER", INT2NUM(BJE_ORDER));
 	
 	rb_define_method(mBlackJack, "str_to_suit", bj_str_to_suit, 1);
 	rb_define_method(mBlackJack, "str_to_face", bj_str_to_face, 1);
@@ -141,6 +143,7 @@ void Init_blackjack()
 	rb_define_method(cGame, "dealer_playing_loop", game_dealer_playing_loop, 0);
 	rb_define_method(cGame, "resolve", game_resolve, 0);
 	rb_define_method(cGame, "players_seated", game_players_seated, 0);
+	rb_define_method(cGame, "shuffled_cards", game_shuffled_cards, 0);
 	
 	rb_define_method(cGame, "save", game_save, 0);
 	rb_define_method(cGame, "restore", game_restore, 1);
@@ -360,7 +363,7 @@ VALUE game_place_bet(VALUE self, VALUE name, VALUE bet)
 	if(!(p = find_player(ctx->seats, StringValueCStr(name))))
 		return INT2NUM(BJE_NOT_FOUND);
 	
-	return INT2NUM(place_bet(p, NUM2DBL(bet)));
+	return INT2NUM(place_bet(ctx, p, NUM2DBL(bet)));
 }
 
 VALUE game_playing(VALUE self, VALUE name)
@@ -441,6 +444,15 @@ VALUE game_players_seated(VALUE self)
 	if(ctx->seats)
 		return Qtrue;
 	return Qfalse;
+}
+
+VALUE game_shuffled_cards(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	return INT2NUM(card_count(ctx->shuffled));
 }
 
 VALUE game_save(VALUE self)
