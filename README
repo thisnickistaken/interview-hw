@@ -72,3 +72,5 @@ Basic concepts here to keep any frustration to a minimum are:
 -At game end, you must shuffle by pressing the 'Shuffle' button.  Then you may place bets and deal a new game.
 
 Games are saved between each play and can be recalled at any point by entering the name and clicking load.
+
+The install script for this sub-project assumes it is installing to a default Apache installation on Gentoo (or a distro with similar structure), but it can be very easily modified to work wherever it needs to.
