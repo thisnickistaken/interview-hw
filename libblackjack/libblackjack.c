@@ -206,17 +206,7 @@ int shuffle_deck(struct blackjack_context *ctx)
 	if(ctx->dealer.state == HAND_IN_PLAY && ctx->dealer.cards)
 		return BJE_ORDER;
 	
-	for(p = ctx->seats; p; p = p->next)
-	{
-		for(h = &p->hand; h; h = h->split)
-		{
-			if(h->state == HAND_IN_PLAY && h->bet != 0)
-				break;
-		}
-		if(h)
-			break;
-	}
-	if(p)
+	if(controlling_player(ctx->seats))
 		return BJE_ORDER;
 	
 	for(p = ctx->seats; p; p = p->next)
@@ -665,7 +655,7 @@ struct player *controlling_player(struct player *plist)
 	while(plist)
 	{
 		for(h = &plist->hand; h; h = h->split)
-			if(h->state == HAND_IN_PLAY)
+			if(h->state == HAND_IN_PLAY && h->bet > 0)
 				break;
 		if(h)
 			break;
