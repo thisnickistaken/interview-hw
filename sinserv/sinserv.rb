@@ -9,7 +9,12 @@ server_cgi = "#{server_root}/cgi-bin"
 set :public_folder, server_doc
 
 get "/*/" do |path|
-	File.open("#{server_doc}/#{path}/index.html", "r").read
+	if File.exists?("#{server_doc}/#{path}/index.html")
+		File.open("#{server_doc}/#{path}/index.html", "r").read
+	else
+		status 404
+		"<h1>Error: 404<br />File not found!</h1>"
+	end
 end
 
 post "/cgi-bin/*" do |script|
