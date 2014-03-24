@@ -40,6 +40,7 @@ VALUE game_shuffled_cards(VALUE self);
 VALUE game_save(VALUE self);
 VALUE game_restore(VALUE self, VALUE image);
 
+VALUE game_controlling_player(VALUE self);
 VALUE game_each_player(VALUE self);
 VALUE game_get_player_balance(VALUE self, VALUE name);
 
@@ -148,6 +149,7 @@ void Init_blackjack()
 	rb_define_method(cGame, "save", game_save, 0);
 	rb_define_method(cGame, "restore", game_restore, 1);
 	
+	rb_define_method(cGame, "controlling_player", game_controlling_player, 0);
 	rb_define_method(cGame, "each_player", game_each_player, 0);
 	rb_define_method(cGame, "get_player_balance", game_each_player, 1);
 	
@@ -491,6 +493,21 @@ VALUE game_restore(VALUE self, VALUE image)
 	rb_iv_set(self, "@ctx", Data_Wrap_Struct(rb_cObject, NULL, free_blackjack_context, ctx));
 	
 	return INT2NUM(0);
+}
+
+VALUE game_controlling_player(VALUE self)
+{
+	struct blackjack_context *ctx = NULL;
+	struct player *p = NULL;
+	char buf[128];
+	
+	Data_Get_Struct(rb_iv_get(self, "@ctx"), struct blackjack_context, ctx);
+	
+	if(!(p = controlling_player(ctx->seats)))
+		return Qnil;
+	if(snprintf(buf, 128, "Player.new(\"%s\", %f)", p->name, p->balance) >= 128)
+		return Qnil;
+	return rb_eval_string(buf);
 }
 
 VALUE game_each_player(VALUE self)
