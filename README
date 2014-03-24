@@ -1,13 +1,18 @@
 This project consists of several sub-projects designed to interoperate and build upon each other.
 They must be built in order of dependency.
 
-blackjack-web and blackjack-ruby depend on blackjack-rbext
-blackjack-rbext and blackjack-cli depends on libblackjack
+------------
+dependencies
+------------
+blackjack-cli: libblackjack
+blackjack-rbext: Ruby
+blackjack-ruby: Ruby, blackjack-rbext
+blackjack-web: Ruby, blackjack-rbext, Gem: cgi
+sinserv: Ruby, Gem: sinatra
 
-The ruby packages depend on Ruby and blackjack-web usees the "cgi" Gem.
-
-To build and install:
-
+-----------------
+build and install
+-----------------
 cd libblackjack
 make
 make install
@@ -26,6 +31,9 @@ make install
 cd ..
 cd blackjack-web
 ./cp2http		# You may specify a host to upload to if you have access via ssh, otherwise it installs locally
+cd ..
+cd sinserv
+make install
 cd ..
 
 ------------
@@ -74,3 +82,8 @@ Basic concepts here to keep any frustration to a minimum are:
 Games are saved between each play and can be recalled at any point by entering the name and clicking load.
 
 The install script for this sub-project assumes it is installing to a default Apache installation on Gentoo (or a distro with similar structure), but it can be very easily modified to work wherever it needs to.
+
+-------
+sinserv
+-------
+This is a simple web server built in Ruby using Sinatra.  It serves a static directory that defaults to a default Apache installation for Gentoo Linux as well as runs CGI programs.  It was written to server blackjack-web.
