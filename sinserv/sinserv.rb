@@ -17,17 +17,21 @@ get "*/" do |path|
 end
 
 post "/cgi-bin/*" do |script|
-	ret = IO.popen("#{server_cgi}/#{script}", "r+") do |io|
-		io.print request.env["rack.input"].read
-		io.close_write
-		io.read
+	if File.exists?("#{server_cgi}/#{script}")
+		ret = IO.popen("#{server_cgi}/#{script}", "r+") do |io|
+			io.print request.env["rack.input"].read
+			io.close_write
+			io.read
+		end
+		ret = ret.split("\r\n\r\n", 2)
+		ret[0].each_line do |line|
+			tmp = line.split(": ", 2)
+			headers tmp[0] => tmp[1]
+		end
+		ret[1]
+	else
+		status 404
 	end
-	ret = ret.split("\r\n\r\n", 2)
-	ret[0].each_line do |line|
-		tmp = line.split(": ", 2)
-		headers tmp[0] => tmp[1]
-	end
-	ret[1]
 end
 
 not_found do
