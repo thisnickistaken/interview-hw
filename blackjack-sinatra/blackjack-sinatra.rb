@@ -167,10 +167,45 @@ not_found do
 	"<h1>Invalid Request</h1>"
 end
 
+def check_resolve(game)
+	resolve = true
+	if game.players_seated == false || game.get_dealer_state != HAND_IN_PLAY
+		resolve = false
+	else
+		game.each_player do |player|
+			game.each_hand(player.get_name) do |hand|
+				if hand.get_state == HAND_IN_PLAY
+					resolve = false
+					break
+				end
+			end
+			if not resolve
+				break
+			end
+		end
+	end
+end
+
+def resolve(game)
+	game.dealer_playing_loop do
+		unless (ret = game.play_dealer) == 0
+			return ret
+		end
+	end
+	unless (ret = game.resolve) == 0
+		return ret
+	end
+	
+	return 0
+end
+
 def display(game)
 	ret = $header
 	ret += $header_mid
 	unless game == nil
+		if check_resolve(game)
+			resolve game
+		end
 		ret += game.to_html
 	else
 		ret += "<h4>Click</h4>"
