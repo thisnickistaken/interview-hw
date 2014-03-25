@@ -114,6 +114,8 @@ struct gamestate_header *create_gamestate_image(struct blackjack_context *ctx)
 		}
 		if(p->hand.cards)
 			op->hand.cards = (void *)op->hand.cards - (unsigned long)ctx;
+		if(p->hand.split)
+			op->hand.split = (void *)offset;
 		for(h = p->hand.split; h; h = h->split)
 		{
 			oh = (void *)head->data + offset;
@@ -351,11 +353,10 @@ int play_hand(struct blackjack_context *ctx, struct player *p, int action)
 			if(!(h->split = create_hand(h->bet)))
 				return BJE_ALLOC;
 			p->balance -= h->bet;
-			for(c = h->cards; c->next; c = c->next);
-			if(!(c->next = deal_card(ctx)))
+			h->split->cards = h->cards->next;
+			if(!(h->cards->next = deal_card(ctx)))
 				return BJE_DEAL;
-			for(c = h->split->cards; c->next; c = c->next);
-			if(!(c->next = deal_card(ctx)))
+			if(!(h->split->cards->next = deal_card(ctx)))
 				return BJE_DEAL;
 			break;
 		case ACT_SURRENDER:
