@@ -1,0 +1,50 @@
+.selectable
+{
+	cursor:pointer;
+	text-align:center;
+}
+
+.selectable:hover
+{
+	color:#ffffff;
+	background-color:#0000ff;
+}
+
+.selected
+{
+	color:#ffffff;
+	background-color:#0000aa;
+	text-align:center;
+}
+
+.center
+{
+	text-align: center;
+	margin: 0 auto;
+}
+
+div.cards
+{
+	background-image: url("images/cards.png");
+	background-position: 0px 0px;
+	float:left;
+	height: 123px;
+	width: 79px;
+}
+
+div#cards
+{
+	width: 0px;
+	height: 123px;
+	margin:0 auto;
+}
+
+div#manage_players_div
+{
+	width: 300px;
+}
+
+div#player_list
+{
+	width: 300px;
+}
