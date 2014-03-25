@@ -20,23 +20,25 @@ class Game
 			x = 0
 			self.each_hand(player.get_name) do |hand|
 				if hand.get_state == HAND_IN_PLAY
-					ret += "<h4>#{player.get_name}</h4>"
-					ret += "<h5>Balance: $#{player.get_balance}</h5>"
-					ret += "<h6>Bet: $#{hand.get_bet}</h6>"
-					ret += "<h6>#{state_to_str(hand.get_state)}</h6>"
-					cards = ""
-					count = 0
-					self.each_card(player.get_name, x) do |card|
-						cards += card.to_html
-						count += 1
-					end
-					ret += "<div id=\"cards\" style=\"width: #{count * 79}px\">#{cards}</div>"
+					ret += player.to_html
+					ret += hand.to_html
+					ret += self.cards_to_html(player.get_name, x)
+					break
 				end
 				x += 1
 			end
 		else
 			unless self.get_dealer_state == HAND_IN_PLAY
-				ret += "<h1>GAME END</h1>"
+				ret += self.dealer_to_html
+				self.each_player do |player|
+					ret += player.to_html
+					x = 0
+					self.each_hand(player.get_name) do |hand|
+						ret += hand.to_html
+						ret += self.cards_to_html(player.get_name, x)
+						x += 1
+					end
+				end
 			else
 				ret += "<h4>Place bets</h4>"
 				ret += "<h5>then deal game</h5>"
@@ -47,8 +49,48 @@ class Game
 		
 		return ret
 	end
+	def dealer_to_html
+		ret = "<h4>Dealer<h4>"
+		ret += "<h5>Dealer</h5>"
+		ret += "<h6>Dealer</h6>"
+		ret += "<h6>#{state_to_str(self.get_dealer_state)}</h6>"
+		cards = ""
+		count = 0
+		self.each_dealer_card do |card|
+			cards += card.to_html
+			count += 1
+		end
+		ret += "<div id=\"cards\" style=\"width: #{count * 79}px\">#{cards}</div>"
+		
+		return ret
+	end
+	def cards_to_html(name, index)
+		cards = ""
+		count = 0
+		self.each_card(name, index) do |card|
+			cards += card.to_html
+			count += 1
+		end
+		
+		return "<div id=\"cards\" style=\"width: #{count * 79}px\">#{cards}</div>"
+	end
 end
-
+class Player
+	def to_html
+		ret = "<h4>#{self.get_name}</h4>"
+		ret += "<h5>Balance: $#{self.get_balance}</h5>"
+		
+		return ret
+	end
+end
+class Hand
+	def to_html
+		ret = "<h6>Bet: $#{self.get_bet}</h6>"
+		ret += "<h6>#{state_to_str(self.get_state)}</h6>"
+		
+		return ret
+	end
+end
 class Card
 	def to_html
 		return "<div class=\"cards\" style=\"background-position: #{(self.get_value - 1) * -79}px #{(self.get_suit - 1) * -123}px;\"></div>"
